@@ -180,7 +180,7 @@
         
         // Cargar modelo 3D correspondiente
         const config = banderasConfig[banderaDetectada];
-        await cargarModelo3D(config.modelo, config.color);
+        await cargarModelo3D(config.textura);
         
         console.log(`Bandera detectada: ${config.nombre} (${confianza}%)`);
       } else {
