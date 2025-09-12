@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -9,271 +10,72 @@
 </head>
 <body>
    <header>
-        <a href="landpage.html"><img src="IMG/favicon.png" alt="logo" id="logoprin"></a>
-          <button onclick="location.href='landpage.html'"><i class="fa-solid fa-home"></i></button>
+        <a href="index.html"><img src="IMG/favicon.png" alt="logo" id="logoprin"></a>
+          <button onclick="location.href='index.html'"><i class="fa-solid fa-home"></i></button>
      
     </header>
+    <!-- Modal de trivia -->
+  <div id="modal-trivia" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:2000; justify-content:center; align-items:center;">
+    <div style="position:relative; max-width:90vw; max-height:80vh; background:#222; color:white; border-radius:10px; padding:30px 20px 20px 20px; box-shadow:0 4px 24px #000; overflow-y:auto; min-width:300px;">
+      <button onclick="cerrarModalTrivia()" style="position:absolute; top:10px; right:10px; background:#18510c; color:white; border:none; border-radius:50%; width:40px; height:40px; font-size:1.5rem; cursor:pointer; z-index:10;">&times;</button>
+      <div id="contenido-trivia">
+        <!-- Aquí se carga la trivia -->
+      </div>
+    </div>
+  </div>
   
+<div id="modal-datos" class="modal-overlay">
+    <div class="modal-container">
+      <button onclick="cerrarModalDatos()" class="modal-close-btn">&times;</button>
+      <div id="contenido-datos">
+        </div>
+    </div>
+  </div>
   <!-- Cámara -->
   <video id="video" width="100%" height="100%" autoplay></video>
   
   <!-- Canvas oculto para procesar la imagen -->
   <canvas id="frameCanvas" width="400" height="200" style="display:none;"></canvas>
-  
-  <!-- Histograma -->
-  <canvas id="histograma"></canvas>
+
   
   <!-- Canvas 3D para modelos -->
   <canvas id="canvas3d" style="position: fixed; top: 60px; left: 0; width: 100%; height: calc(100vh - 60px); pointer-events: none; z-index: 500;"></canvas>
   
+
   <!-- Información de detección -->
   <div id="deteccion-info" style="position: fixed; top: 70px; left: 10px; background: rgba(0,0,0,0.7); color: white; padding: 10px; border-radius: 5px; z-index: 1000; display: none;">
     <p id="bandera-detectada">Bandera detectada: <span id="nombre-bandera">-</span></p>
     <p id="confianza">Confianza: <span id="valor-confianza">0%</span></p>
   </div>
 
+  <!-- Modal de video mundial -->
+  <div id="modal-video" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:2000; justify-content:center; align-items:center;">
+    <div style="position:relative; max-width:90vw; max-height:80vh;">
+      <button onclick="cerrarModalVideo()" style="position:absolute; top:10px; right:10px; background:#18510c; color:white; border:none; border-radius:50%; width:40px; height:40px; font-size:1.5rem; cursor:pointer; z-index:10;">&times;</button>
+      <video id="video-mundial" controls style="width:100%; max-height:70vh; border-radius:10px; background:black;">
+        <source src="https://www.fifa.com/video/some-worldcup-video.mp4" type="video/mp4">
+        Tu navegador no soporta la reproducción de video.
+      </video>
+    </div>
+  </div>
+
     <!-- Botones de interacción -->
     <div id="botones-interaccion">
-      <button class="btn-interaccion" id="video"><i class="fa-solid fa-video"></i></button>
+      <button class="btn-interaccion" id="videomodal"><i class="fa-solid fa-video"></i></button>
       <button class="btn-interaccion" id="datos"><i class="fa-solid fa-question"></i></button>
       <button class="btn-interaccion" id="trivia"><i class="fa-solid fa-clipboard-check"></i></button>
       <button class="btn-interaccion" id="animacion"><i class="fa-solid fa-cube"></i></button>
+      <button class="btn-interaccion" id="btn-iniciar-modelo" style="display:none;"><i class="fa-solid fa-play"></i></button>
     </div>
-  
-  <!-- Chart.js -->
+   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <!-- TensorFlow.js -->
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
   <!-- Three.js para modelos 3D -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-  <script>
-    let model;
-    let scene, camera, renderer, currentModel;
-    
-    // Configuración de banderas y sus modelos 3D correspondientes
-    let modelo="3D_model/F2.glb";
-    let banderasConfig={
-      0:{nombre:"Mexico",textura:"3D_model/textures/Mexico.png"},
-      1:{nombre:"USA",textura:"3D_model/textures/USA.png"},
-      2:{nombre:"Canada",textura:"3D_model/textures/Canada.png"},
-      3:{nombre:"Japon",textura:"3D_model/textures/Japon.png"},
-      4:{nombre:"Nueva Zelanda",textura:"3D_model/textures/Nueva_Zelanda.png"},
-      5:{nombre:"Iran",textura:"3D_model/textures/Iran.png"},
-      6:{nombre:"Argentina",textura:"3D_model/textures/Argentina.png"},
-      7:{nombre:"Urbekistan",textura:"3D_model/textures/Urbekistan.png"},
-      8:{nombre:"Corea",textura:"3D_model/textures/Corea.png"},
-      9:{nombre:"Jordania",textura:"3D_model/textures/Jordania.png"},
-      10:{nombre:"Australia",textura:"3D_model/textures/Australia.png"},
-      11:{nombre:"Brasil",textura:"3D_model/textures/Brasil.png"},
-      12:{nombre:"Ecuador",textura:"3D_model/textures/Ecuador.png"}
-    }
-    // Inicializar Three.js
-    function inicializarThreeJS() {
-      const canvas3d = document.getElementById('canvas3d');
-      
-      // Escena
-      scene = new THREE.Scene();
-      
-      // Cámara
-      camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-      camera.position.z = 5;
-      
-      // Renderizador
-      renderer = new THREE.WebGLRenderer({ 
-        canvas: canvas3d, 
-        alpha: true,
-        antialias: true 
-      });
-      renderer.setSize(window.innerWidth, window.innerHeight - 60);
-      renderer.setClearColor(0x000000, 0); // Transparente
-      
-      // Luces
-      const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-      scene.add(ambientLight);
-      
-      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-      directionalLight.position.set(1, 1, 1);
-      scene.add(directionalLight);
-      
-      // Comenzar el loop de renderizado
-      animate();
-    }
 
-    function animate() {
-      requestAnimationFrame(animate);
-      
-      if (currentModel) {
-        currentModel.rotation.y += 0.01; // Rotación automática
-      }
-      
-      renderer.render(scene, camera);
-    }
+  <script src="RA.js"></script>
 
-    async function cargarModelo() {
-      model = await tf.loadLayersModel("modeloIA/model.json");
-      console.log("Modelo de IA cargado");
-    }
-
-    async function cargarModelo3D(textura) {
-      
-      const loader = new THREE.GLTFLoader();
-      
-      try {
-        const gltf = await new Promise((resolve, reject) => {
-          loader.load(modelo, resolve, undefined, reject);
-        });
-        
-        currentModel = gltf.scene;
-        currentModel.scale.set(2, 2, 2); // Escalar modelo
-        currentModel.position.set(0, 0, 0);
-
-        const textureLoader = new THREE.TextureLoader();
-        const texture = textureLoader.load(textura);
-        currentModel.traverse((child) => {
-          if (child.isMesh) {
-            child.material.map = texture;
-            child.material.needsUpdate = true;
-          }
-        });
-
-        scene.add(currentModel);
-        console.log("Modelo 3D cargado:", modelo);
-        
-      } catch (error) {
-        console.error("Error cargando modelo 3D:", error);
-        // Crear un cubo simple como fallback
-        const geometry = new THREE.BoxGeometry(1, 1, 1);
-        const material = new THREE.MeshBasicMaterial({ color: color });
-        currentModel = new THREE.Mesh(geometry, material);
-        scene.add(currentModel);
-      }
-    }
-
-    async function predecir() {
-      if (!model) return;
-      
-      // Asegurar que el frame esté actualizado
-      ctx.drawImage(video, 0, 0, frameCanvas.width, frameCanvas.height);
-      
-      const tensor = tf.browser.fromPixels(frameCanvas)
-        .resizeNearestNeighbor([224, 224]) // tamaño del modelo
-        .toFloat()
-        .div(255.0) // Normalizar a 0-1
-        .expandDims();
-
-      const pred = await model.predict(tensor).data();
-      
-      // Encontrar la clase con mayor probabilidad
-      const maxProb = Math.max(...pred);
-      const banderaDetectada = pred.indexOf(maxProb);
-      const confianza = (maxProb * 100).toFixed(1);
-      
-   
-      const umbralConfianza = 0.7; // 70%
-      
-      if (maxProb > umbralConfianza && banderasConfig[banderaDetectada]) {
-        // Mostrar información de detección
-        document.getElementById('deteccion-info').style.display = 'block';
-        document.getElementById('nombre-bandera').textContent = banderasConfig[banderaDetectada].nombre;
-        document.getElementById('valor-confianza').textContent = confianza + '%';
-        
-        // Cargar modelo 3D correspondiente
-        const config = banderasConfig[banderaDetectada];
-        await cargarModelo3D(config.textura);
-        
-        console.log(`Bandera detectada: ${config.nombre} (${confianza}%)`);
-      } else {
-        // Ocultar información si no hay detección confiable
-        document.getElementById('deteccion-info').style.display = 'none';
-        if (currentModel) {
-          scene.remove(currentModel);
-          currentModel = null;
-        }
-      }
-      
-      // Limpiar tensor para evitar memory leaks
-      tensor.dispose();
-    }
- 
-    const video = document.getElementById("video");
-    const frameCanvas = document.getElementById("frameCanvas");
-    const ctx = frameCanvas.getContext("2d");
-
-    // Inicializar cámara trasera
-    const constraints = {
-      video: {
-        facingMode: { exact: "environment" } // Fuerza la cámara trasera
-      }
-    };
-
-    navigator.mediaDevices.getUserMedia(constraints)
-      .then(stream => {
-        video.srcObject = stream;
-      })
-      .catch(error => {
-        console.error("Error accediendo a la cámara trasera:", error);
-        // Fallback: intenta con cualquier cámara si falla la trasera
-        navigator.mediaDevices.getUserMedia({ video: true })
-          .then(stream => {
-            video.srcObject = stream;
-          })
-          .catch(fallbackError => {
-            console.error("Error accediendo a cualquier cámara:", fallbackError);
-            alert("No se pudo acceder a la cámara. Verifica los permisos.");
-          });
-      });
-
-    // Configuración del histograma con Chart.js
-    const histCtx = document.getElementById("histograma").getContext("2d");
-    const histChart = new Chart(histCtx, {
-      type: "bar",
-      data: {
-        labels: Array.from({length: 256}, (_, i) => i),
-        datasets: [
-          { label: "Rojo", data: new Array(256).fill(0), backgroundColor: "red" },
-          { label: "Verde", data: new Array(256).fill(0), backgroundColor: "green" },
-          { label: "Azul", data: new Array(256).fill(0), backgroundColor: "blue" }
-        ]
-      },
-      options: { responsive: false, scales: { x: { display: false } } }
-    });
-
-    function actualizarHistograma() {
-      ctx.drawImage(video, 0, 0, frameCanvas.width, frameCanvas.height);
-      const frame = ctx.getImageData(0, 0, frameCanvas.width, frameCanvas.height);
-      const data = frame.data;
-
-      // Reiniciar contadores
-      const histR = new Array(256).fill(0);
-      const histG = new Array(256).fill(0);
-      const histB = new Array(256).fill(0);
-
-      for (let i = 0; i < data.length; i += 4) {
-        histR[data[i]]++;
-        histG[data[i + 1]]++;
-        histB[data[i + 2]]++;
-      }
-
-      histChart.data.datasets[0].data = histR;
-      histChart.data.datasets[1].data = histG;
-      histChart.data.datasets[2].data = histB;
-      histChart.update();
-    }
-
-     // Inicializar todo
-     cargarModelo();
-     inicializarThreeJS();
-
-     // Manejar redimensionamiento de pantalla
-     window.addEventListener('resize', () => {
-       camera.aspect = window.innerWidth / window.innerHeight;
-       camera.updateProjectionMatrix();
-       renderer.setSize(window.innerWidth, window.innerHeight - 60);
-     });
-
-     setInterval(predecir, 500); // actualiza cada 500ms
-     setInterval(actualizarHistograma, 200); // actualiza cada 200ms
-  </script>
 </body>
 </html>

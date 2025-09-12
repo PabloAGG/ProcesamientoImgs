@@ -1,0 +1,39 @@
+{
+  "mundial_actual": {
+    "nombre": "Copa Mundial de la FIFA 2026",
+    "fecha": "11 de junio - 19 de julio, 2026",
+    "sedes": ["Estados Unidos", "Canadá", "México"],
+    "equipos": 48,
+    "curiosidades": [
+      "Será la primera vez que participen 48 equipos.",
+      "Es la primera vez que tres países organizan juntos el torneo.",
+      "El torneo tendrá 104 partidos, un aumento significativo respecto a los 64 anteriores."
+    ]
+  },
+  "historia": {
+    "primer_mundial": {
+      "año": 1930,
+      "sede": "Uruguay",
+      "campeon": "Uruguay",
+      "dato": "Uruguay fue seleccionado como sede para celebrar el centenario de su independencia y ganó el torneo en casa, venciendo a Argentina en la final."
+    },
+    "maximos_ganadores": [
+      { "pais": "Brasil", "titulos": 5 },
+      { "pais": "Alemania", "titulos": 4 },
+      { "pais": "Italia", "titulos": 4 },
+      { "pais": "Argentina", "titulos": 3 }
+    ],
+    "records_jugadores": {
+      "maximo_goleador_historico": { "nombre": "Miroslav Klose", "goles": 16, "pais": "Alemania" },
+      "mas_partidos_jugados": { "nombre": "Lionel Messi", "partidos": 26, "pais": "Argentina" },
+      "mas_mundiales_jugados": { "nombre": "Antonio Carbajal (MEX), Lothar Matthäus (ALE), Rafa Márquez (MEX), Lionel Messi (ARG), Cristiano Ronaldo (POR)", "cantidad": 5 },
+      "campeon_mas_joven": { "nombre": "Pelé", "edad": "17 años", "pais": "Brasil", "año": 1958 }
+    },
+    "datos_curiosos_historicos": [
+      "El trofeo original, la Copa Jules Rimet, fue robado en 1983 en Brasil y nunca se recuperó.",
+      "El partido con más goles en la historia de los Mundiales fue la victoria de Austria 7-5 sobre Suiza en 1954.",
+      "Solo dos selecciones han ganado el torneo de forma consecutiva: Italia (1934 y 1938) y Brasil (1958 y 1962).",
+      "La mayor goleada fue un 10-1 de Hungría sobre El Salvador en el Mundial de España 1982."
+    ]
+  }
+}

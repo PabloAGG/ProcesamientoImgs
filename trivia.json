@@ -1,0 +1,29 @@
+{
+  "preguntas": [
+    {
+      "pregunta": "¿En qué año se celebró la primera Copa Mundial de la FIFA?",
+      "opciones": ["1928", "1930", "1934", "1942"],
+      "respuesta": 1
+    },
+    {
+      "pregunta": "¿Qué país ha ganado más Copas Mundiales de la FIFA?",
+      "opciones": ["Alemania", "Italia", "Brasil", "Argentina"],
+      "respuesta": 2
+    },
+    {
+      "pregunta": "¿Cuántos equipos participarán en el Mundial 2026?",
+      "opciones": ["32", "36", "40", "48"],
+      "respuesta": 3
+    },
+    {
+      "pregunta": "¿Cuál de estos países será sede del Mundial 2026?",
+      "opciones": ["España", "México", "Francia", "Qatar"],
+      "respuesta": 1
+    },
+    {
+      "pregunta": "¿Quién fue el máximo goleador del Mundial 2018?",
+      "opciones": ["Harry Kane", "Kylian Mbappé", "Cristiano Ronaldo", "Luka Modrić"],
+      "respuesta": 0
+    }
+  ]
+}
