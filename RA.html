@@ -5,6 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TIKITAKA-RA</title>
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intro.js/7.2.0/introjs.min.css"  crossorigin="anonymous" referrerpolicy="no-referrer" />
   <link rel="stylesheet" href="CSS/RA.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
@@ -76,6 +77,81 @@
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 
   <script src="RA.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/7.2.0/intro.min.js"  crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script> 
+document.addEventListener('DOMContentLoaded', function() {
 
+// Solo mostrar el tutorial si no se ha completado antes
+if (!localStorage.getItem('introRA')) {
+  const introSteps = [
+    {
+      element: document.querySelector('header'),
+      intro: "¡Bienvenido a la experiencia de Realidad Aumentada del Mundial! Desde aquí puedes volver a la página principal.",
+      position: 'bottom'
+    },
+    {
+      element: document.querySelector('#videomodal'),
+      intro: "Haz clic aquí para ver un video especial sobre el Mundial.",
+      position: 'left'
+    },
+    {
+      element: document.querySelector('#datos'),
+      intro: "Aquí puedes consultar datos y curiosidades del Mundial.",
+      position: 'left'
+    },
+    {
+      element: document.querySelector('#trivia'),
+      intro: "Pon a prueba tus conocimientos con la trivia del Mundial.",
+      position: 'left'
+    },
+    {
+      element: document.querySelector('#animacion'),
+      intro: "Activa la cámara y la detección de banderas para ver modelos 3D en RA.",
+      position: 'left'
+    },
+    {
+      element: document.querySelector('#btn-iniciar-modelo'),
+      intro: "Cuando la cámara esté activa, aquí podrás iniciar la animación del modelo 3D detectado.",
+      position: 'left'
+    },
+    {
+      element: document.querySelector('#video'),
+      intro: "Aquí verás la cámara en tiempo real para escanear banderas.",
+      position: 'top'
+    },
+    {
+      element: document.querySelector('#canvas3d'),
+      intro: "En este espacio aparecerán los modelos 3D de las banderas detectadas.",
+      position: 'top'
+    },
+    {
+      intro: "¡Has completado el tour! Ya puedes disfrutar de todas las funciones de la página RA. ¡Diviértete!"
+    }
+  ];
+
+  // Filtrar pasos donde el elemento existe
+  const activeIntroSteps = introSteps.filter(step => {
+    if (step.element) {
+      return step.element !== null;
+    }
+    return true;
+  });
+
+  if (activeIntroSteps.length > 0) {
+    introJs().setOptions({
+      steps: activeIntroSteps,
+      nextLabel: 'Siguiente →',
+      prevLabel: '← Anterior',
+      doneLabel: 'Finalizar',
+      tooltipClass: 'introjs-custom-tooltip',
+      showBullets: false,
+    }).oncomplete(function() {
+      localStorage.setItem('introRA', '1');
+    }).start();
+  }
+}
+
+});
+</script>
 </body>
 </html>

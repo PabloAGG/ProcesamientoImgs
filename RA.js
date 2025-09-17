@@ -140,219 +140,204 @@ function cerrarModalVideo() {
 }
 
 // --- INICIO RA ---
+
+// Variables para animación
+let mixer = null;
+let clock = null;
+
 function RAbegin() {
   // Mostrar botón extra para animar modelo
   const btnIniciarModelo = document.getElementById('btn-iniciar-modelo');
   if (btnIniciarModelo) btnIniciarModelo.style.display = '';
-    let model;
-    let scene, camera, renderer, currentModel;
-    
-    // Configuración de banderas y sus modelos 3D correspondientes
-    let modelo="3D_model/F2.glb";
-    let banderasConfig={
-      0:{nombre:"Mexico",textura:"3D_model/textures/Mexico.png"},
-      1:{nombre:"USA",textura:"3D_model/textures/USA.png"},
-      2:{nombre:"Canada",textura:"3D_model/textures/Canada.png"},
-      3:{nombre:"Japon",textura:"3D_model/textures/Japon.png"},
-      4:{nombre:"Nueva Zelanda",textura:"3D_model/textures/Nueva_Zelanda.png"},
-      5:{nombre:"Iran",textura:"3D_model/textures/Iran.png"},
-      6:{nombre:"Argentina",textura:"3D_model/textures/Argentina.png"},
-      7:{nombre:"Urbekistan",textura:"3D_model/textures/Urbekistan.png"},
-      8:{nombre:"Corea",textura:"3D_model/textures/Corea.png"},
-      9:{nombre:"Jordania",textura:"3D_model/textures/Jordania.png"},
-      10:{nombre:"Australia",textura:"3D_model/textures/Australia.png"},
-      11:{nombre:"Brasil",textura:"3D_model/textures/Brasil.png"},
-      12:{nombre:"Ecuador",textura:"3D_model/textures/Ecuador.png"}
+  let model;
+  let scene, camera, renderer, currentModel;
+  // Configuración de banderas y sus modelos 3D correspondientes
+  let modelo = "3D_model/F2.glb";
+  let banderasConfig = {
+    0: { nombre: "Mexico", textura: "3D_model/textures/Mexico.png" },
+    1: { nombre: "USA", textura: "3D_model/textures/USA.png" },
+    2: { nombre: "Canada", textura: "3D_model/textures/Canada.png" },
+    3: { nombre: "Japon", textura: "3D_model/textures/Japon.png" },
+    4: { nombre: "Nueva Zelanda", textura: "3D_model/textures/Nueva_Zelanda.png" },
+    5: { nombre: "Iran", textura: "3D_model/textures/Iran.png" },
+    6: { nombre: "Argentina", textura: "3D_model/textures/Argentina.png" },
+    7: { nombre: "Urbekistan", textura: "3D_model/textures/Urbekistan.png" },
+    8: { nombre: "Corea", textura: "3D_model/textures/Corea.png" },
+    9: { nombre: "Jordania", textura: "3D_model/textures/Jordania.png" },
+    10: { nombre: "Australia", textura: "3D_model/textures/Australia.png" },
+    11: { nombre: "Brasil", textura: "3D_model/textures/Brasil.png" },
+    12: { nombre: "Ecuador", textura: "3D_model/textures/Ecuador.png" }
+  }
+  // Inicializar Three.js
+  function inicializarThreeJS() {
+    const canvas3d = document.getElementById('canvas3d');
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.z = 5;
+    renderer = new THREE.WebGLRenderer({
+      canvas: canvas3d,
+      alpha: true,
+      antialias: true
+    });
+    renderer.setSize(window.innerWidth, window.innerHeight - 60);
+    renderer.setClearColor(0x000000, 0);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(ambientLight);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    directionalLight.position.set(1, 1, 1);
+    scene.add(directionalLight);
+    clock = new THREE.Clock();
+    animate();
+  }
+
+  function animate() {
+    requestAnimationFrame(animate);
+    if (currentModel) {
+      currentModel.rotation.y += 0.01;
     }
-    // Inicializar Three.js
-    function inicializarThreeJS() {
-      const canvas3d = document.getElementById('canvas3d');
-      
-      // Escena
-      scene = new THREE.Scene();
-      
-      // Cámara
-      camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-      camera.position.z = 5;
-      
-      // Renderizador
-      renderer = new THREE.WebGLRenderer({ 
-        canvas: canvas3d, 
-        alpha: true,
-        antialias: true 
-      });
-      renderer.setSize(window.innerWidth, window.innerHeight - 60);
-      renderer.setClearColor(0x000000, 0); // Transparente
-      
-      // Luces
-      const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-      scene.add(ambientLight);
-      
-      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-      directionalLight.position.set(1, 1, 1);
-      scene.add(directionalLight);
-      
-      // Comenzar el loop de renderizado
-      animate();
+    if (mixer) {
+      const delta = clock.getDelta();
+      mixer.update(delta);
     }
+    renderer.render(scene, camera);
+  }
 
-    function animate() {
-      requestAnimationFrame(animate);
-      
-      if (currentModel) {
-        currentModel.rotation.y += 0.01; // Rotación automática
-      }
-      
-      renderer.render(scene, camera);
-    }
+  async function cargarModelo() {
+    model = await tf.loadLayersModel("modeloIA/model.json");
+    console.log("Modelo de IA cargado");
+  }
 
-    async function cargarModelo() {
-      model = await tf.loadLayersModel("modeloIA/model.json");
-      console.log("Modelo de IA cargado");
-    }
-
-    async function cargarModelo3D(textura) {
-      
-      const loader = new THREE.GLTFLoader();
-      
-      try {
-        const gltf = await new Promise((resolve, reject) => {
-          loader.load(modelo, resolve, undefined, reject);
-        });
-        
-        currentModel = gltf.scene;
-        currentModel.scale.set(2, 2, 2); // Escalar modelo
-        currentModel.position.set(0, 0, 0);
-
-        const textureLoader = new THREE.TextureLoader();
-        const texture = textureLoader.load(textura);
-        currentModel.traverse((child) => {
-          if (child.isMesh) {
-            child.material.map = texture;
-            child.material.needsUpdate = true;
-          }
-        });
-
-        scene.add(currentModel);
-        console.log("Modelo 3D cargado:", modelo);
-        
-      } catch (error) {
-        console.error("Error cargando modelo 3D:", error);
-        // Crear un cubo simple como fallback
-        const geometry = new THREE.BoxGeometry(1, 1, 1);
-        const material = new THREE.MeshBasicMaterial({ color: color });
-        currentModel = new THREE.Mesh(geometry, material);
-        scene.add(currentModel);
-      }
-    }
-
-    async function predecir() {
-      if (!model) return;
-      
-      // Asegurar que el frame esté actualizado
-      ctx.drawImage(video, 0, 0, frameCanvas.width, frameCanvas.height);
-      
-      const tensor = tf.browser.fromPixels(frameCanvas)
-        .resizeNearestNeighbor([224, 224]) // tamaño del modelo
-        .toFloat()
-        .div(255.0) // Normalizar a 0-1
-        .expandDims();
-
-      const pred = await model.predict(tensor).data();
-      
-      // Encontrar la clase con mayor probabilidad
-      const maxProb = Math.max(...pred);
-      const banderaDetectada = pred.indexOf(maxProb);
-      const confianza = (maxProb * 100).toFixed(1);
-      
+  async function cargarModelo3D(textura) {
+    const loader = new THREE.GLTFLoader();
+    // Eliminar modelo anterior si existe
    
-      const umbralConfianza = 0.7; // 70%
-      
-      if (maxProb > umbralConfianza && banderasConfig[banderaDetectada]) {
-        // Mostrar información de detección
-        document.getElementById('deteccion-info').style.display = 'block';
-        document.getElementById('nombre-bandera').textContent = banderasConfig[banderaDetectada].nombre;
-        document.getElementById('valor-confianza').textContent = confianza + '%';
-        
-        // Cargar modelo 3D correspondiente
-        const config = banderasConfig[banderaDetectada];
-        await cargarModelo3D(config.textura);
-        
-        console.log(`Bandera detectada: ${config.nombre} (${confianza}%)`);
-      } else {
-        // Ocultar información si no hay detección confiable
-        document.getElementById('deteccion-info').style.display = 'none';
-        if (currentModel) {
-          scene.remove(currentModel);
-          currentModel = null;
+    mixer = null;
+    try {
+      const gltf = await new Promise((resolve, reject) => {
+        loader.load(modelo, resolve, undefined, reject);
+      });
+      currentModel = gltf.scene;
+      currentModel.scale.set(1.5, 1.5, 1.5);
+      currentModel.position.set(0, -1, 0); // Ajuste para centrar el modelo verticalmente
+      currentModel.rotation.set(0, 0, 0); // Resetear rotación
+      const textureLoader = new THREE.TextureLoader();
+      const texture = textureLoader.load(textura);
+      currentModel.traverse((child) => {
+        if (child.isMesh) {
+          child.material.map = texture;
+          child.material.needsUpdate = true;
+        }
+      });
+      scene.add(currentModel);
+      // Preparar animaciones si existen
+      if (gltf.animations && gltf.animations.length > 0) {
+        mixer = new THREE.AnimationMixer(currentModel);
+        // Buscar animación llamada 'Summary'
+        const summaryClip = gltf.animations.find(a => a.name === 'Wave');
+        if (summaryClip) {
+          mixer.clipAction(summaryClip).stop(); // No iniciar automáticamente
         }
       }
-      
-      // Limpiar tensor para evitar memory leaks
-      tensor.dispose();
+      console.log("Modelo 3D cargado:", modelo);
+    } catch (error) {
+      console.error("Error cargando modelo 3D:", error);
+      const geometry = new THREE.BoxGeometry(1, 1, 1);
+      const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+      currentModel = new THREE.Mesh(geometry, material);
+      scene.add(currentModel);
     }
- 
-    const video = document.getElementById("video");
-    const frameCanvas = document.getElementById("frameCanvas");
-    const ctx = frameCanvas.getContext("2d");
+  }
 
+  async function predecir() {
+    if (!model) return;
+    ctx.drawImage(video, 0, 0, frameCanvas.width, frameCanvas.height);
+    const tensor = tf.browser.fromPixels(frameCanvas)
+      .resizeNearestNeighbor([224, 224])
+      .toFloat()
+      .div(255.0)
+      .expandDims();
+    const pred = await model.predict(tensor).data();
+    const maxProb = Math.max(...pred);
+    const banderaDetectada = pred.indexOf(maxProb);
+    const confianza = (maxProb * 100).toFixed(1);
+    const umbralConfianza = 0.7;
+    if (maxProb > umbralConfianza && banderasConfig[banderaDetectada]) {
+      document.getElementById('deteccion-info').style.display = 'block';
+      document.getElementById('nombre-bandera').textContent = banderasConfig[banderaDetectada].nombre;
+      document.getElementById('valor-confianza').textContent = confianza + '%';
+      const config = banderasConfig[banderaDetectada];
+      await cargarModelo3D(config.textura);
+      console.log(`Bandera detectada: ${config.nombre} (${confianza}%)`);
+    } else {
+      document.getElementById('deteccion-info').style.display = 'none';
+      if (currentModel) {
+        scene.remove(currentModel);
+        currentModel = null;
+      }
+    }
+    tensor.dispose();
+  }
+
+  const video = document.getElementById("video");
+  const frameCanvas = document.getElementById("frameCanvas");
+  const ctx = frameCanvas.getContext("2d");
 
   // Inicializar cámara trasera
-    const constraints = {
-      video: {
-        facingMode: { exact: "environment" } // Fuerza la cámara trasera
-      }
-    };
-
-    navigator.mediaDevices.getUserMedia(constraints)
-      .then(stream => {
-        video.srcObject = stream;
-      })
-      .catch(error => {
-        console.error("Error accediendo a la cámara trasera:", error);
-        // Fallback: intenta con cualquier cámara si falla la trasera
-        navigator.mediaDevices.getUserMedia({ video: true })
-          .then(stream => {
-            video.srcObject = stream;
-          })
-          .catch(fallbackError => {
-            console.error("Error accediendo a cualquier cámara:", fallbackError);
-            alert("No se pudo acceder a la cámara. Verifica los permisos.");
-          });
-      });
-
-     // Inicializar todo
-     cargarModelo();
-     inicializarThreeJS();
-
-     // Manejar redimensionamiento de pantalla
-     window.addEventListener('resize', () => {
-       camera.aspect = window.innerWidth / window.innerHeight;
-       camera.updateProjectionMatrix();
-       renderer.setSize(window.innerWidth, window.innerHeight - 60);
-     });
-
-     setInterval(predecir, 500); // actualiza cada 500ms
-
-    // Evento para animar el modelo 3D
-    if (btnIniciarModelo) {
-      btnIniciarModelo.onclick = function() {
-        if (window.currentModel) {
-          // Aumentar velocidad de rotación o iniciar animación especial
-          if (!window.animandoModelo) {
-            window.animandoModelo = true;
-            let velocidad = 0.05;
-            function animar() {
-              if (window.currentModel && window.animandoModelo) {
-                window.currentModel.rotation.y += velocidad;
-                requestAnimationFrame(animar);
-              }
-            }
-            animar();
-          }
-        }
-      };
+  const constraints = {
+    video: {
+      facingMode: { exact: "environment" }
     }
+  };
+  navigator.mediaDevices.getUserMedia(constraints)
+    .then(stream => {
+      video.srcObject = stream;
+    })
+    .catch(error => {
+      console.error("Error accediendo a la cámara trasera:", error);
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+          video.srcObject = stream;
+        })
+        .catch(fallbackError => {
+          console.error("Error accediendo a cualquier cámara:", fallbackError);
+          alert("No se pudo acceder a la cámara. Verifica los permisos.");
+        });
+    });
+  cargarModelo();
+  inicializarThreeJS();
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight - 60);
+  });
+  setInterval(predecir, 500);
+  // Evento para animar el modelo 3D
+  if (btnIniciarModelo) {
+    btnIniciarModelo.onclick = function() {
+      if (mixer) {
+        // Buscar animación llamada 'Summary' y reproducirla
+        const actions = mixer._actions || [];
+        let summaryAction = null;
+        if (actions.length > 0) {
+          summaryAction = actions.find(a => a._clip && a._clip.name === 'Wave');
+        }
+        if (!summaryAction && mixer._root && mixer._root.animations) {
+          // fallback: buscar en animations
+          const summaryClip = mixer._root.animations.find(a => a.name === 'Wave');
+          if (summaryClip) summaryAction = mixer.clipAction(summaryClip);
+        }
+        if (summaryAction) {
+          summaryAction.reset();
+          summaryAction.play();
+        } else {
+    console.log("Animaciones encontradas en el modelo:", mixer._actions.map(a => a._clip.name));
+          alert('No se encontró la animación "Summary" en el modelo.');
+        }
+      } else {
+        alert('Este modelo no tiene animaciones.');
+      }
+    }
+  }
 }
 
 // Asignar eventos a los botones de interacción
