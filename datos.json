@@ -1,0 +1,110 @@
+{
+  "Mexico": {
+    "capital": "Ciudad de México",
+    "continente": "América del Norte",
+    "mejor_mundial": "Cuartos de final (1970, 1986)",
+    "dato_curioso": "Junto con Brasil, Italia, Francia y Alemania, es uno de los pocos países que ha organizado dos Copas del Mundo."
+  },
+  "Canada": {
+    "capital": "Ottawa",
+    "continente": "América del Norte",
+    "mejor_mundial": "Fase de grupos",
+    "dato_curioso": "Alphonso Davies anotó el primer gol de Canadá en la historia de los Mundiales en Qatar 2022."
+  },
+  "USA": {
+    "capital": "Washington, D.C.",
+    "continente": "América del Norte",
+    "mejor_mundial": "Tercer lugar (1930)",
+    "dato_curioso": "En el Mundial de 1994, organizado en EE. UU., se registró el promedio de asistencia más alto de la historia."
+  },
+  "Australia": {
+    "capital": "Canberra",
+    "continente": "Oceanía (compite en AFC)",
+    "mejor_mundial": "Octavos de final (2006)",
+    "dato_curioso": "Australia participó en las eliminatorias de Oceanía hasta 2006, cuando se unió a la Confederación Asiática de Fútbol (AFC)."
+  },
+  "Iran": {
+    "capital": "Teherán",
+    "continente": "Asia",
+    "mejor_mundial": "Fase de grupos",
+    "dato_curioso": "Su primera victoria en un Mundial fue contra Estados Unidos en 1998, en un partido de gran carga política."
+  },
+  "Japon": {
+    "capital": "Tokio",
+    "continente": "Asia",
+    "mejor_mundial": "Octavos de final",
+    "dato_curioso": "Conocidos como los 'Samuráis Azules', han clasificado a todos los mundiales de forma consecutiva desde 1998."
+  },
+  "Jordania": {
+    "capital": "Amán",
+    "continente": "Asia",
+    "mejor_mundial": "Debut en 2026",
+    "dato_curioso": "Su clasificación al Mundial 2026 es el mayor logro en la historia de su fútbol, tras ser subcampeón de la Copa Asiática 2023."
+  },
+  "Corea": {
+    "capital": "Seúl",
+    "continente": "Asia",
+    "mejor_mundial": "Cuarto lugar (2002)",
+    "dato_curioso": "Es la selección asiática con más participaciones en la Copa del Mundo."
+  },
+  "Uzbekistan": {
+    "capital": "Taskent",
+    "continente": "Asia",
+    "mejor_mundial": "Debut en 2026",
+    "dato_curioso": "Es uno de los dos únicos países en el mundo que están 'doblemente sin salida al mar', es decir, rodeado por países que tampoco tienen salida al mar."
+  },
+  "Argentina": {
+    "capital": "Buenos Aires",
+    "continente": "América del Sur",
+    "mejor_mundial": "Campeón (1978, 1986, 2022)",
+    "dato_curioso": "Diego Maradona anotó el 'Gol del Siglo' y la 'Mano de Dios' en el mismo partido contra Inglaterra en México 1986."
+  },
+  "Brasil": {
+    "capital": "Brasilia",
+    "continente": "América del Sur",
+    "mejor_mundial": "Campeón (5 veces)",
+    "dato_curioso": "Es la única selección que ha jugado en todas las Copas del Mundo y la que más títulos ha ganado."
+  },
+  "Colombia": {
+    "capital": "Bogotá",
+    "continente": "América del Sur",
+    "mejor_mundial": "Cuartos de final (2014)",
+    "dato_curioso": "En el Mundial de 2014, James Rodríguez fue el máximo goleador del torneo con 6 goles."
+  },
+  "Ecuador": {
+    "capital": "Quito",
+    "continente": "América del Sur",
+    "mejor_mundial": "Octavos de final (2006)",
+    "dato_curioso": "Su estadio en Quito está a 2,850 metros sobre el nivel del mar, dándoles una gran ventaja de local."
+  },
+  "Paraguay": {
+    "capital": "Asunción",
+    "continente": "América del Sur",
+    "mejor_mundial": "Cuartos de final (2010)",
+    "dato_curioso": "En el Mundial de 2010, solo recibieron 2 goles en 5 partidos, mostrando una defensa muy sólida."
+  },
+  "Uruguay": {
+    "capital": "Montevideo",
+    "continente": "América del Sur",
+    "mejor_mundial": "Campeón (1930, 1950)",
+    "dato_curioso": "Ganó el primer Mundial de la historia en 1930 como país anfitrión."
+  },
+  "Marruecos": {
+    "capital": "Rabat",
+    "continente": "África",
+    "mejor_mundial": "Cuarto lugar (2022)",
+    "dato_curioso": "En Qatar 2022, se convirtieron en la primera nación africana y árabe en llegar a las semifinales de un Mundial."
+  },
+  "Tunisia": {
+    "capital": "Túnez",
+    "continente": "África",
+    "mejor_mundial": "Fase de grupos",
+    "dato_curioso": "En Argentina 1978, se convirtieron en el primer equipo africano en ganar un partido en la Copa del Mundo (3-1 contra México)."
+  },
+  "Nueva Zelanda": {
+    "capital": "Wellington",
+    "continente": "Oceanía",
+    "mejor_mundial": "Fase de grupos",
+    "dato_curioso": "En el Mundial de Sudáfrica 2010, fueron la única selección que no perdió ningún partido, empatando sus tres encuentros."
+  }
+}

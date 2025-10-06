@@ -47,17 +47,39 @@
   <div id="deteccion-info" style="position: fixed; top: 70px; left: 10px; background: rgba(0,0,0,0.7); color: white; padding: 10px; border-radius: 5px; z-index: 1000; display: none;">
     <p id="bandera-detectada">Bandera detectada: <span id="nombre-bandera">-</span></p>
     <p id="confianza">Confianza: <span id="valor-confianza">0%</span></p>
+    <button onclick="mostrarDatosPais()" style="margin-top: 10px; background: #18510c; color: white; border: none; border-radius: 5px; padding: 8px 12px; cursor: pointer; font-size: 0.9rem;">Ver más datos</button>
+  </div>
+
+  <!-- Indicador de animación en progreso -->
+  <div id="animacion-progreso" style="position: fixed; top: 70px; right: 10px; background: rgba(255,107,53,0.9); color: white; padding: 10px; border-radius: 5px; z-index: 1000; display: none;">
+    <p style="margin: 0; font-size: 0.9rem;">🎬 Reproduciendo animación...</p>
+    <p style="margin: 5px 0 0 0; font-size: 0.8rem; opacity: 0.8;">Detección pausada</p>
+  </div>
+
+  <!-- Modal de datos del país detectado -->
+  <div id="modal-pais-detectado" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:2500; justify-content:center; align-items:center;">
+    <div style="position:relative; max-width:90vw; width:500px; max-height:80vh; background:#222; color:white; border-radius:15px; padding:25px; box-shadow:0 8px 32px rgba(0,0,0,0.5); overflow-y:auto; border-top: 4px solid #18510c;">
+      <button onclick="cerrarModalPais()" style="position:absolute; top:15px; right:15px; background:#18510c; color:white; border:none; border-radius:50%; width:35px; height:35px; font-size:1.3rem; cursor:pointer; z-index:10; transition: background 0.2s;">&times;</button>
+      <div id="contenido-pais-detectado">
+        <!-- Aquí se cargan los datos del país -->
+      </div>
+    </div>
   </div>
 
   <!-- Modal de video mundial -->
   <div id="modal-video" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:2000; justify-content:center; align-items:center;">
     <div style="position:relative; max-width:90vw; max-height:80vh;">
       <button onclick="cerrarModalVideo()" style="position:absolute; top:10px; right:10px; background:#18510c; color:white; border:none; border-radius:50%; width:40px; height:40px; font-size:1.5rem; cursor:pointer; z-index:10;">&times;</button>
-      <video id="video-mundial" controls style="width:100%; max-height:70vh; border-radius:10px; background:black;">
-        <source src="https://www.fifa.com/video/some-worldcup-video.mp4" type="video/mp4">
-        Tu navegador no soporta la reproducción de video.
-      </video>
+      <iframe id="video-mundial" src="" style="width:800px; height:450px; max-width:90vw; max-height:70vh; border-radius:10px; border:none;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"  allowfullscreen>
+      </iframe>
     </div>
+  </div>
+  <div id="btn-modal-video" style="display:none; position:fixed; bottom:20px; left:50%; transform:translateX(-50%); z-index:2100; gap:15px; justify-content:center; align-items:center;">
+    <button class="btn-interaccion mov" onclick="cambiarVideo(-1)">◀</button>
+    <button class="btn-interaccion filtro" id="filtro1" onclick="filtro1()">1</button>
+    <button class="btn-interaccion filtro" id="filtro2" onclick="filtro2()">2</button>
+    <button class="btn-interaccion filtro" id="filtro3" onclick="filtro3()">3</button>
+    <button class="btn-interaccion mov" onclick="cambiarVideo(1)">▶</button>
   </div>
 
     <!-- Botones de interacción -->
@@ -67,6 +89,7 @@
       <button class="btn-interaccion" id="trivia"><i class="fa-solid fa-clipboard-check"></i></button>
       <button class="btn-interaccion" id="animacion"><i class="fa-solid fa-cube"></i></button>
       <button class="btn-interaccion" id="btn-iniciar-modelo" style="display:none;"><i class="fa-solid fa-play"></i></button>
+      <button class="btn-interaccion" id="btn-diagnostico" style="display:none; background:#ff6b35;"><i class="fa-solid fa-bug"></i></button>
     </div>
    <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

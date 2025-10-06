@@ -1,29 +1,94 @@
 {
   "preguntas": [
     {
-      "pregunta": "¿En qué año se celebró la primera Copa Mundial de la FIFA?",
-      "opciones": ["1928", "1930", "1934", "1942"],
+      "pregunta": "¿Cuál de estos estadios mexicanos fue sede de dos finales de Copa del Mundo?",
+      "opciones": ["Estadio Jalisco", "Estadio Azteca", "Estadio BBVA", "Estadio Olímpico Universitario"],
       "respuesta": 1
     },
     {
-      "pregunta": "¿Qué país ha ganado más Copas Mundiales de la FIFA?",
-      "opciones": ["Alemania", "Italia", "Brasil", "Argentina"],
+      "pregunta": "¿Contra qué país fue el primer partido de Canadá en un Mundial (1986)?",
+      "opciones": ["Hungría", "Unión Soviética", "Francia", "Brasil"],
       "respuesta": 2
     },
     {
-      "pregunta": "¿Cuántos equipos participarán en el Mundial 2026?",
-      "opciones": ["32", "36", "40", "48"],
-      "respuesta": 3
+      "pregunta": "En el Mundial de 1950, EE. UU. logró una victoria histórica contra ¿qué selección?",
+      "opciones": ["Inglaterra", "Brasil", "Italia", "Uruguay"],
+      "respuesta": 0
     },
     {
-      "pregunta": "¿Cuál de estos países será sede del Mundial 2026?",
-      "opciones": ["España", "México", "Francia", "Qatar"],
+      "pregunta": "¿Cómo se apoda a la selección de fútbol de Australia?",
+      "opciones": ["The Kangaroos", "The Wallabies", "The Socceroos", "The Koalas"],
+      "respuesta": 2
+    },
+    {
+      "pregunta": "Ali Daei, el legendario goleador de Irán, es famoso por haber anotado más de 100 goles con su selección. ¿Verdadero o Falso?",
+      "opciones": ["Verdadero", "Falso"],
+      "respuesta": 0
+    },
+    {
+      "pregunta": "¿En qué año la selección de Japón organizó su primera Copa del Mundo, junto a Corea del Sur?",
+      "opciones": ["1998", "2002", "2006", "2010"],
       "respuesta": 1
     },
     {
-      "pregunta": "¿Quién fue el máximo goleador del Mundial 2018?",
-      "opciones": ["Harry Kane", "Kylian Mbappé", "Cristiano Ronaldo", "Luka Modrić"],
+      "pregunta": "Jordania hará su debut en la Copa del Mundo en 2026. ¿Verdadero o Falso?",
+      "opciones": ["Verdadero", "Falso"],
       "respuesta": 0
+    },
+    {
+      "pregunta": "¿Cuál fue el mejor resultado de Corea del Sur en una Copa del Mundo?",
+      "opciones": ["Final", "Semifinales", "Cuartos de final", "Octavos de final"],
+      "respuesta": 1
+    },
+    {
+      "pregunta": "Uzbekistán, al igual que Jordania, también debutará en la Copa del Mundo en 2026. ¿Verdadero o Falso?",
+      "opciones": ["Verdadero", "Falso"],
+      "respuesta": 0
+    },
+    {
+      "pregunta": "¿Quién es el máximo goleador histórico de la selección de Argentina?",
+      "opciones": ["Diego Maradona", "Gabriel Batistuta", "Lionel Messi", "Mario Kempes"],
+      "respuesta": 2
+    },
+    {
+      "pregunta": "¿Qué selección es la única que ha participado en todas las ediciones de la Copa del Mundo?",
+      "opciones": ["Alemania", "Argentina", "Italia", "Brasil"],
+      "respuesta": 3
+    },
+    {
+      "pregunta": "René Higuita, famoso portero de Colombia, era conocido por una jugada llamada...",
+      "opciones": ["La bicicleta", "El escorpión", "La elástica", "La mano de Dios"],
+      "respuesta": 1
+    },
+    {
+      "pregunta": "¿Cuál fue el mejor resultado de Ecuador en una Copa del Mundo, llegando a octavos de final?",
+      "opciones": ["Japón 2002", "Alemania 2006", "Brasil 2014", "Qatar 2022"],
+      "respuesta": 1
+    },
+    {
+      "pregunta": "José Luis Chilavert, portero de Paraguay, era un especialista en...",
+      "opciones": ["Atajar penales", "Saques de banda", "Tiros libres", "Juego aéreo"],
+      "respuesta": 2
+    },
+    {
+      "pregunta": "¿Quién fue el primer campeón de la Copa del Mundo en 1930?",
+      "opciones": ["Argentina", "Brasil", "Italia", "Uruguay"],
+      "respuesta": 3
+    },
+    {
+      "pregunta": "¿Cuál fue la selección africana que llegó más lejos en la historia de los mundiales, alcanzando las semifinales en 2022?",
+      "opciones": ["Nigeria", "Camerún", "Senegal", "Marruecos"],
+      "respuesta": 3
+    },
+    {
+      "pregunta": "¿Cómo se apoda a la selección de Túnez?",
+      "opciones": ["Los Leones del Atlas", "Las Águilas de Cartago", "Los Faraones", "Las Estrellas Negras"],
+      "respuesta": 1
+    },
+    {
+      "pregunta": "En el Mundial 2010, Nueva Zelanda fue la única selección que terminó el torneo...",
+      "opciones": ["Sin recibir goles", "Invicta (sin perder)", "Con más goles", "Con 3 empates"],
+      "respuesta": 1
     }
   ]
 }

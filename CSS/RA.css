@@ -187,7 +187,42 @@ canvas {
     background: #13700a;
     transform: scale(0.95);
 }
+#btn-modal-video {
+    display: none; /* Oculto por defecto */
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2100;
+    gap: 15px;
+    justify-content: center;
+    align-items: center;
+}
 
+#btn-modal-video.show {
+    display: flex;
+}
+
+.filtro {
+    background: #ff6b35 !important;
+}
+
+.filtro:hover {
+    background: #e55a2b !important;
+}
+
+.mov {
+    background: #0066cc !important;
+}
+
+.mov:hover {
+    background: #0052a3 !important;
+}
+
+/* Estilos para el modal del país detectado */
+#modal-pais-detectado button:hover {
+    background: #2a8a1a !important;
+}
 @media (max-width: 480px) {
     #botones-interaccion {
         gap: 10px;
