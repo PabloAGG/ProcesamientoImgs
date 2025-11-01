@@ -75,6 +75,8 @@ let resizeObserver = null;
 let paisDetectadoActual = null;
 let contadorDeteccionSostenida = 0;
 const DETECCIONES_REQUERIDAS = 3; // Número de detecciones consecutivas antes de cambiar
+let modalTimeout = null;
+let lastHighConfidenceDetection = null;
 
 const UI = {
   viewer: null,
@@ -87,9 +89,13 @@ const UI = {
   animacionCard: null,
   nombreBandera: null,
   valorConfianza: null,
-  controlHub: null,
-  hubToggle: null,
-  hubButtons: [],
+  sidebarMenu: null,
+  menuToggle: null,
+  menuPanel: null,
+  menuOverlay: null,
+  menuClose: null,
+  sidebarButtons: [],
+  raControls: null,
   panel: null,
   panelTitle: null,
   panelBody: null,
@@ -113,9 +119,13 @@ function init() {
   UI.animacionCard = document.getElementById('animacion-progreso');
   UI.nombreBandera = document.getElementById('nombre-bandera');
   UI.valorConfianza = document.getElementById('valor-confianza');
-  UI.controlHub = document.getElementById('control-hub');
-  UI.hubToggle = document.getElementById('hub-toggle');
-  UI.hubButtons = Array.from(document.querySelectorAll('.hub-btn'));
+  UI.sidebarMenu = document.getElementById('sidebar-menu');
+  UI.menuToggle = document.getElementById('menu-toggle');
+  UI.menuPanel = document.getElementById('menu-panel');
+  UI.menuOverlay = document.getElementById('menu-overlay');
+  UI.menuClose = document.getElementById('menu-close');
+  UI.sidebarButtons = Array.from(document.querySelectorAll('.sidebar-btn'));
+  UI.raControls = document.getElementById('ra-controls');
   UI.panel = document.getElementById('info-panel');
   UI.panelTitle = document.getElementById('panel-title');
   UI.panelBody = document.getElementById('panel-body');
@@ -123,7 +133,7 @@ function init() {
   UI.startButton = document.getElementById('btn-iniciar-modelo');
   UI.diagnosticButton = document.getElementById('btn-diagnostico');
 
-  setupHub();
+  setupSidebarMenu();
   setupStageObservers();
   bindControlButtons();
 
@@ -131,16 +141,26 @@ function init() {
   setPanelEmptyState();
 }
 
-function setupHub() {
-  if (!UI.controlHub) return;
+function setupSidebarMenu() {
+  if (!UI.sidebarMenu) return;
 
-  UI.hubToggle?.addEventListener('click', () => {
-    UI.controlHub.classList.toggle('is-open');
-    UI.hubToggle.setAttribute('aria-expanded', UI.controlHub.classList.contains('is-open'));
+  UI.menuToggle?.addEventListener('click', () => {
+    UI.sidebarMenu.classList.add('is-open');
   });
 
-  UI.hubButtons.forEach((btn) => {
-    btn.addEventListener('click', () => handleAction(btn.dataset.action));
+  UI.menuClose?.addEventListener('click', () => {
+    UI.sidebarMenu.classList.remove('is-open');
+  });
+  
+  UI.menuOverlay?.addEventListener('click', () => {
+    UI.sidebarMenu.classList.remove('is-open');
+  });
+
+  UI.sidebarButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      handleAction(btn.dataset.action);
+      UI.sidebarMenu.classList.remove('is-open');
+    });
   });
 
   UI.panelClose?.addEventListener('click', closePanel);
@@ -177,13 +197,13 @@ function handleAction(action) {
   }
 
   if (action === 'animacion') {
-    setActiveHubButton(action);
+    setActiveSidebarButton(action);
     startRA();
     return;
   }
 
   detenerRA();
-  setActiveHubButton(action);
+  setActiveSidebarButton(action);
   setStageMode('panel');
 
   switch (action) {
@@ -202,17 +222,17 @@ function handleAction(action) {
   }
 }
 
-function flashHubButton(action) {
-  const button = UI.hubButtons.find((btn) => btn.dataset.action === action);
+function flashSidebarButton(action) {
+  const button = UI.sidebarButtons.find((btn) => btn.dataset.action === action);
   if (!button) return;
   button.classList.add('is-flash');
   setTimeout(() => button.classList.remove('is-flash'), 450);
 }
 
-function setActiveHubButton(action) {
-  UI.hubButtons.forEach((btn) => {
+function setActiveSidebarButton(action) {
+  UI.sidebarButtons.forEach((btn) => {
     const isActive = Boolean(action && btn.dataset.action === action);
-    btn.classList.toggle('hub-btn--active', isActive);
+    btn.classList.toggle('sidebar-btn--active', isActive);
     btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
   });
 }
@@ -245,6 +265,8 @@ function setStageMode(mode) {
   if (UI.viewer) {
     UI.viewer.dataset.mode = mode;
     UI.viewer.classList.toggle('show-panel', mode === 'panel');
+    UI.viewer.classList.toggle('stage-mode--ra', mode === 'ra');
+    UI.viewer.classList.toggle('stage-mode--idle', mode === 'idle');
   }
 
   if (UI.stage) {
@@ -303,7 +325,7 @@ function openPanel(action, title, content) {
   currentPanelAction = action;
 
   if (action) {
-    setActiveHubButton(action);
+    setActiveSidebarButton(action);
   }
 
   if (UI.panel) {
@@ -329,11 +351,17 @@ function closePanel() {
   cleanupPanel(previousAction);
   setPanelEmptyState();
 
+  // Cancelar timeout si se cierra el panel manualmente
+  if (modalTimeout) {
+    clearTimeout(modalTimeout);
+    modalTimeout = null;
+  }
+
   if (raSessionActive) {
-    setActiveHubButton('animacion');
+    setActiveSidebarButton('animacion');
     setStageMode('ra');
   } else {
-    setActiveHubButton(null);
+    setActiveSidebarButton(null);
     setStageMode('idle');
   }
 }
@@ -737,8 +765,9 @@ async function mostrarDatosPais() {
 
 async function startRA() {
   setStageMode('ra');
-  UI.startButton && (UI.startButton.style.display = 'flex');
-  UI.diagnosticButton && (UI.diagnosticButton.style.display = 'flex');
+  if (UI.raControls) {
+    UI.raControls.style.display = 'block';
+  }
 
   if (raSessionActive) {
     renderRAInstructions();
@@ -903,6 +932,17 @@ async function predecir() {
         if (config.textura) {
           await cargarModelo3D(config.textura);
         }
+        
+        // Activar modal automático si la confianza es mayor al 90%
+        if (maxProb > 0.9 && !modalTimeout) {
+          lastHighConfidenceDetection = config.nombre;
+          modalTimeout = setTimeout(() => {
+            if (paisDetectadoActual === lastHighConfidenceDetection) {
+              mostrarDatosPais();
+            }
+            modalTimeout = null;
+          }, 3000);
+        }
       }
     } else {
       // Reiniciar contador si es la misma bandera
@@ -911,11 +951,28 @@ async function predecir() {
       if (UI.valorConfianza) {
         UI.valorConfianza.textContent = `${confianza}%`;
       }
+      
+      // Activar modal automático si la confianza es mayor al 90%
+      if (maxProb > 0.9 && !modalTimeout && paisDetectadoActual !== lastHighConfidenceDetection) {
+        lastHighConfidenceDetection = config.nombre;
+        modalTimeout = setTimeout(() => {
+          if (paisDetectadoActual === lastHighConfidenceDetection) {
+            mostrarDatosPais();
+          }
+          modalTimeout = null;
+        }, 3000);
+      }
     }
   } else if (paisDetectadoActual !== null) {
     // Solo limpiar si había algo detectado anteriormente
     contadorDeteccionSostenida = 0;
     paisDetectadoActual = null;
+    
+    // Cancelar timeout si se pierde la detección
+    if (modalTimeout) {
+      clearTimeout(modalTimeout);
+      modalTimeout = null;
+    }
     hideDetectionCards();
     clearModel();
   }
@@ -1107,8 +1164,16 @@ function detenerRA() {
     animationFrameId = null;
   }
 
-  UI.startButton && (UI.startButton.style.display = 'none');
-  UI.diagnosticButton && (UI.diagnosticButton.style.display = 'none');
+  if (UI.raControls) {
+    UI.raControls.style.display = 'none';
+  }
+
+  // Limpiar timeout del modal automático
+  if (modalTimeout) {
+    clearTimeout(modalTimeout);
+    modalTimeout = null;
+  }
+  lastHighConfidenceDetection = null;
 
   raSessionActive = false;
 

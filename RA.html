@@ -11,7 +11,7 @@
 </head>
 <body>
   <header>
-    <a href="index.html"><img src="IMG/favicon.png" alt="logo" id="logoprin"></a>
+    <div class="header__logo"><a href="index.html"><img src="IMG/favicon.png" alt="logo" id="logoprin"></a><span>TIKITAKA</span></div>
     <button onclick="location.href='index.html'" class="header__home"><i class="fa-solid fa-home"></i></button>
   </header>
 
@@ -56,38 +56,67 @@
     </section>
   </main>
 
-  <nav id="control-hub" class="control-hub" aria-label="Acciones rápidas">
-    <button id="hub-toggle" class="control-hub__toggle" type="button" aria-expanded="false">
+  <!-- Menú lateral desplegable -->
+  <nav id="sidebar-menu" class="sidebar-menu" aria-label="Menú principal">
+    <button id="menu-toggle" class="sidebar-menu__toggle" type="button" aria-expanded="false">
       <i class="fa-solid fa-futbol"></i>
       <span>Explorar</span>
     </button>
-    <div class="control-hub__actions">
-      <button class="hub-btn" type="button" data-action="animacion">
-        <i class="fa-solid fa-cube"></i>
-        <span>RA</span>
-      </button>
-      <button class="hub-btn" type="button" data-action="video">
-        <i class="fa-solid fa-video"></i>
-        <span>Videos</span>
-      </button>
-      <button class="hub-btn" type="button" data-action="datos">
-        <i class="fa-solid fa-chart-simple"></i>
-        <span>Datos</span>
-      </button>
-      <button class="hub-btn" type="button" data-action="trivia">
-        <i class="fa-solid fa-clipboard-check"></i>
-        <span>Trivia</span>
-      </button>
-      <button class="hub-btn" type="button" id="btn-iniciar-modelo" style="display:none;" data-action="animar">
-        <i class="fa-solid fa-play"></i>
-        <span>Anima</span>
-      </button>
-      <button class="hub-btn hub-btn--alert" type="button" id="btn-diagnostico" style="display:none;" data-action="diagnostico">
-        <i class="fa-solid fa-bug"></i>
-        <span>Diag</span>
-      </button>
+    <div class="sidebar-menu__overlay" id="menu-overlay"></div>
+    <div class="sidebar-menu__panel" id="menu-panel">
+      <div class="sidebar-menu__header">
+        <h3><i class="fa-solid fa-futbol"></i> TIKITAKA</h3>
+        <button id="menu-close" class="sidebar-menu__close" type="button" aria-label="Cerrar menú">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="sidebar-menu__content">
+        <button class="sidebar-btn" type="button" data-action="animacion">
+          <i class="fa-solid fa-cube"></i>
+          <div class="sidebar-btn__content">
+            <span class="sidebar-btn__title">Realidad Aumentada</span>
+            <span class="sidebar-btn__desc">Escanea banderas en tiempo real</span>
+          </div>
+        </button>
+        <button class="sidebar-btn" type="button" data-action="video">
+          <i class="fa-solid fa-video"></i>
+          <div class="sidebar-btn__content">
+            <span class="sidebar-btn__title">Videos Highlights</span>
+            <span class="sidebar-btn__desc">Momentos épicos del Mundial</span>
+          </div>
+        </button>
+        <button class="sidebar-btn" type="button" data-action="datos">
+          <i class="fa-solid fa-chart-simple"></i>
+          <div class="sidebar-btn__content">
+            <span class="sidebar-btn__title">Atlas Mundialista</span>
+            <span class="sidebar-btn__desc">Datos y curiosidades</span>
+          </div>
+        </button>
+        <button class="sidebar-btn" type="button" data-action="trivia">
+          <i class="fa-solid fa-clipboard-check"></i>
+          <div class="sidebar-btn__content">
+            <span class="sidebar-btn__title">Trivia Mundial</span>
+            <span class="sidebar-btn__desc">Pon a prueba tus conocimientos</span>
+          </div>
+        </button>
+      </div>
     </div>
   </nav>
+
+  <!-- Controles específicos para RA -->
+  <div id="ra-controls" class="ra-controls" style="display:none;">
+    <div class="ra-scanner"></div>
+    <div class="ra-controls__buttons">
+      <button class="ra-control-btn" type="button" id="btn-iniciar-modelo" data-action="animar">
+        <i class="fa-solid fa-play"></i>
+        <span>Animar</span>
+      </button>
+      <button class="ra-control-btn ra-control-btn--alert" type="button" id="btn-diagnostico" data-action="diagnostico">
+        <i class="fa-solid fa-bug"></i>
+        <span>Limpiar</span>
+      </button>
+    </div>
+  </div>
 
    <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -112,33 +141,13 @@ if (!localStorage.getItem(INTRO_KEY)) {
       position: 'bottom'
     },
     {
-      element: document.getElementById('hub-toggle'),
-      intro: "Este botón despliega el dock de acciones rápidas. Úsalo para alternar entre experiencias.",
-      position: 'top'
-    },
-    {
-      element: document.querySelector('.hub-btn[data-action="animacion"]'),
-      intro: "Activa la cámara para escanear banderas y mostrar modelos 3D en realidad aumentada.",
-      position: 'top'
-    },
-    {
-      element: document.querySelector('.hub-btn[data-action="video"]'),
-      intro: "Descubre highlights y videos especiales del Mundial 2026 en un panel lateral.",
-      position: 'top'
-    },
-    {
-      element: document.querySelector('.hub-btn[data-action="datos"]'),
-      intro: "Consulta datos y curiosidades en un formato tipo dashboard, sin abrir modales flotantes.",
-      position: 'top'
-    },
-    {
-      element: document.querySelector('.hub-btn[data-action="trivia"]'),
-      intro: "Pon a prueba tus conocimientos con la trivia oficial del Mundial.",
+      element: document.getElementById('menu-toggle'),
+      intro: "Este botón abre el menú lateral con todas las experiencias disponibles. Úsalo para navegar entre funciones.",
       position: 'top'
     },
     {
       element: document.querySelector('.ra-viewer__stage'),
-      intro: "Aquí vivirá la magia: verás la cámara y, sobre ella, los modelos 3D con las banderas detectadas.",
+      intro: "Aquí vivirá la magia: verás la cámara con el efecto scanner y, sobre ella, los modelos 3D con las banderas detectadas.",
       position: 'left'
     },
     {
@@ -147,7 +156,7 @@ if (!localStorage.getItem(INTRO_KEY)) {
       position: 'left'
     },
     {
-      intro: "¡Listo! Explora el Mundial con el nuevo dock y disfruta de la experiencia RA."
+      intro: "¡Listo! Explora el Mundial con el nuevo menú lateral y disfruta de la experiencia RA mejorada con detección automática."
     }
   ];
 
