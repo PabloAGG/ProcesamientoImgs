@@ -1,70 +1,93 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/x-icon" href="IMG/favicon.png">
     <link rel="stylesheet" href="CSS/style.css">
-      <script src="https://kit.fontawesome.com/093074d40c.js" crossorigin="anonymous"></script>
-      <meta name="description" content="Bienvenido a TIKITAKA, tu fuente de información y Realidad Aumentada sobre la Copa Mundial de Fútbol 2026 en México.">
-    <meta name="keywords" content="Copa Mundial, Fútbol, 2026, México, Realidad Aumentada">
-      
+    <script src="https://kit.fontawesome.com/093074d40c.js" crossorigin="anonymous"></script>
+    <meta name="description" content="Bienvenido a TIKITAKA, tu hub interactivo con datos y realidad aumentada del Mundial 2026 en México, Estados Unidos y Canadá.">
+    <meta name="keywords" content="Copa Mundial, Fútbol, 2026, México, Realidad Aumentada, Estadísticas">
     <title>TIKITAKA</title>
 </head>
 <body>
-    <header>
-        <a href="index.html"><img src="IMG/favicon.png" alt="logo" id="logoprin"></a>
-         <button onclick="location.href='RA.html'"><i class="fa-solid fa-camera"></i></button>
+    <header class="site-header">
+        <a href="index.html" class="site-logo"><img src="IMG/favicon.png" alt="logo" id="logoprin"></a>
+        <button class="header__cta" type="button" onclick="location.href='RA.html'">
+            <i class="fa-solid fa-cube"></i>
+            <span>Experiencia RA</span>
+        </button>
     </header>
-<main>
-    <h1>Bienvenido a TIKITAKA</h1>
-    <h4>Mundial de Fútbol 2026 Mexico USA Canada</h4>
-<br>
-<section class="info">
-    <p>La Copa Mundial de Fútbol de 2026 será la vigésima tercera edición de la Copa Mundial de Fútbol organizada por la FIFA.</p>
-    <p>Será la vigésima tercera edición de la Copa Mundial de Fútbol organizada por la FIFA y se desarrollará del 11 de junio al 19 de julio de 2026</p>
-    <p>Esta será la primera ocasión en que cuarenta y ocho selecciones participen en la fase final</p>
-    <p>El Mundial 2026 se realizará en tres países (México, Estados Unidos y Canadá) porque así lo decidió el Congreso de la FIFA en 2018, marcando la primera vez que un torneo de esta magnitud se celebra en múltiples sedes. Esta decisión se tomó también en parte debido al aumento en el número de selecciones participantes</p>
 
-</section>
+    <main class="landing-shell">
+        <section class="hero-card glass-card">
+            <div class="hero-card__meta">
+                <span class="pill">Experiencia Mundial 2026</span>
+                <h1>Bienvenido a TIKITAKA</h1>
+                <p>Tu punto de partida para explorar el Mundial de Fútbol 2026 con datos, historias y una experiencia de realidad aumentada lista para escanear banderas.</p>
+            </div>
+            <div class="hero-card__actions">
+                <button class="cta-btn" type="button" onclick="location.href='RA.html'">
+                    <i class="fa-solid fa-camera"></i>
+                    <span>Iniciar escáner RA</span>
+                </button>
+                <button class="secondary-btn" type="button" onclick="document.getElementById('datos').scrollIntoView({ behavior: 'smooth' });">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>Ver estadísticas</span>
+                </button>
+            </div>
+        </section>
 
-<div class="image-container">
-    <img src="IMG/worldcup2026.webp" alt="Mundial de Fútbol 2026">
-</div>
+        <section class="info-grid">
+            <article class="glass-card info-card">
+                <h2>Preparados para 2026</h2>
+                <ul class="info-list">
+                    <li>La Copa Mundial de la FIFA 2026 será la vigésimo tercera edición del torneo.</li>
+                    <li>El certamen se disputará del 11 de junio al 19 de julio de 2026.</li>
+                    <li>Por primera vez 48 selecciones competirán en la fase final.</li>
+                    <li>México, Estados Unidos y Canadá compartirán la sede en una histórica colaboración.</li>
+                </ul>
+            </article>
 
-<div class="champ-info">
-    <h4>Ultimos Ediciones</h4>
-  <table>
-    <tr>
-        <th>Año</th>
-        <th>Campeón</th>
-        <th>Subcampeón</th>
-    </tr>
-    <tr>
-        <td>2018</td>
-        <td>Francia</td>
-        <td>Croacia</td>
-    </tr>
-    <tr>
-        <td>2014</td>
-        <td>Alemania</td>
-        <td>Argentina</td>
-    </tr>
-    <tr>
-        <td>2010</td>
-        <td>España</td>
-        <td>Países Bajos</td>
-    </tr>
-  </table>
-</div>
+            <article class="glass-card media-card">
+                <img src="IMG/worldcup2026.webp" alt="Mundial de Fútbol 2026">
+            </article>
 
-<div class="btn">
-    <button onclick="location.href='RA.html'"><i class="fa-solid fa-camera"></i> Ir a escaner </button>
-</div>
-</main>
-<footer>
-    <p>&copy; 2025 TIKITAKA. All rights reserved.</p>
-<p>2006335 Pablo Garcia</p>
-</footer>
+            <article class="glass-card stats-card" id="datos">
+                <h2>Últimas ediciones</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Año</th>
+                            <th>Campeón</th>
+                            <th>Subcampeón</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>2018</td>
+                            <td>Francia</td>
+                            <td>Croacia</td>
+                        </tr>
+                        <tr>
+                            <td>2014</td>
+                            <td>Alemania</td>
+                            <td>Argentina</td>
+                        </tr>
+                        <tr>
+                            <td>2010</td>
+                            <td>España</td>
+                            <td>Países Bajos</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </article>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <p>&copy; 2025 TIKITAKA. Todos los derechos reservados.</p>
+        <p>2006335 Pablo Garcia</p>
+    </footer>
 </body>
 </html>

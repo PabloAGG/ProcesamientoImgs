@@ -1,221 +1,38 @@
-// --- FUNCION PARA DETENER LA CAMARA ---
-function detenerCamara() {
-  const video = document.getElementById('video');
-  if (video && video.srcObject) {
-    const tracks = video.srcObject.getTracks();
-    tracks.forEach(track => track.stop());
-    video.srcObject = null;
-  }
-}
-// --- MODAL TRIVIA ---
+const banderasConfig = {
+  0: { nombre: "Mexico", textura: "3D_model/textures/Mexico.png" },
+  1: { nombre: "USA", textura: "3D_model/textures/USA.png" },
+  2: { nombre: "Canada", textura: "3D_model/textures/Canada.png" },
+  3: { nombre: "Japon", textura: "3D_model/textures/Japon.png" },
+  4: { nombre: "Nueva Zelanda", textura: "3D_model/textures/Nueva_Zelanda.png" },
+  5: { nombre: "Iran", textura: "3D_model/textures/Iran.png" },
+  6: { nombre: "Argentina", textura: "3D_model/textures/Argentina.png" },
+  7: { nombre: "Uzbekistan", textura: "3D_model/textures/Urbekistan.png" },
+  8: { nombre: "Corea", textura: "3D_model/textures/Corea.png" },
+  9: { nombre: "Jordania", textura: "3D_model/textures/Jordania.png" },
+  10: { nombre: "Australia", textura: "3D_model/textures/Australia.png" },
+  11: { nombre: "Brasil", textura: "3D_model/textures/Brasil.png" },
+  12: { nombre: "Ecuador", textura: "3D_model/textures/Ecuador.png" },
+  13: { nombre: "Colombia", textura: "3D_model/textures/Colombia.png" },
+  14: { nombre: "Paraguay", textura: "3D_model/textures/Paraguay.png" },
+  15: { nombre: "Uruguay", textura: "3D_model/textures/Uruguay.png" },
+  16: { nombre: "Marruecos", textura: "3D_model/textures/Marruecos.png" },
+  17: { nombre: "Tunez", textura: "3D_model/textures/Tunez.png" },
+  18: { nombre: "NO", textura: null }
+};
+
 let preguntasTrivia = [];
 let indiceTrivia = 0;
 let aciertosTrivia = 0;
 
-async function mostrarModalTrivia() {
-  const modal = document.getElementById('modal-trivia');
-  const cont = document.getElementById('contenido-trivia');
-  cont.innerHTML = '<p>Cargando trivia...</p>';
-  modal.style.display = 'flex';
-  try {
-    const resp = await fetch('trivia.json');
-    const data = await resp.json();
-    // Seleccionar 5 preguntas aleatorias
-    const todasLasPreguntas = data.preguntas;
-    const preguntasAleatorias = [];
-    const indicesUsados = new Set();
-    
-    while (preguntasAleatorias.length < 5 && preguntasAleatorias.length < todasLasPreguntas.length) {
-      const indiceAleatorio = Math.floor(Math.random() * todasLasPreguntas.length);
-      if (!indicesUsados.has(indiceAleatorio)) {
-        indicesUsados.add(indiceAleatorio);
-        preguntasAleatorias.push(todasLasPreguntas[indiceAleatorio]);
-      }
-    }
-    
-    preguntasTrivia = preguntasAleatorias;
-    indiceTrivia = 0;
-    aciertosTrivia = 0;
-    mostrarPreguntaTrivia();
-  } catch (e) {
-    cont.innerHTML = '<p style="color:red">No se pudo cargar la trivia.</p>';
-  }
-}
-
-function mostrarPreguntaTrivia() {
-  const cont = document.getElementById('contenido-trivia');
-  if (indiceTrivia >= preguntasTrivia.length) {
-    cont.innerHTML = `<h2>¡Trivia finalizada!</h2><p>Respuestas correctas: ${aciertosTrivia} de ${preguntasTrivia.length}</p><button onclick='cerrarModalTrivia()' style='margin-top:20px; background:#18510c; color:white; border:none; border-radius:8px; padding:10px 20px; font-size:1rem; cursor:pointer;'>Cerrar</button>`;
-    return;
-  }
-  const p = preguntasTrivia[indiceTrivia];
-  cont.innerHTML = `
-    <h3>Pregunta ${indiceTrivia+1} de ${preguntasTrivia.length}</h3>
-    <p style='margin-bottom:10px;'>${p.pregunta}</p>
-    <div id='opciones-trivia'>
-      ${p.opciones.map((op, i) => `<button onclick='responderTrivia(${i})' style='display:block; margin:8px 0; width:100%; background:#18510c; color:white; border:none; border-radius:8px; padding:10px; font-size:1rem; cursor:pointer;'>${op}</button>`).join('')}
-    </div>
-  `;
-}
-
-function responderTrivia(indiceOpcion) {
-  const p = preguntasTrivia[indiceTrivia];
-  if (indiceOpcion === p.respuesta) {
-    aciertosTrivia++;
-  }
-  indiceTrivia++;
-  mostrarPreguntaTrivia();
-}
-
-function cerrarModalTrivia() {
-  document.getElementById('modal-trivia').style.display = 'none';
-}
-// Asignar evento al botón de trivia
-window.addEventListener('DOMContentLoaded', function() {
-  const btnTrivia = document.querySelector('#botones-interaccion #trivia');
-  if (btnTrivia) {
-    btnTrivia.addEventListener('click', mostrarModalTrivia);
-  }
-});
-// --- MODAL DATOS ---
-async function mostrarModalDatos() {
-  const modal = document.getElementById('modal-datos');
-  const cont = document.getElementById('contenido-datos');
-  cont.innerHTML = '<p>Cargando datos...</p>';
-  modal.style.display = 'flex';
-
-  try {
-    const resp = await fetch('datos_mundial.json');
-    if (!resp.ok) {
-        throw new Error(`HTTP error! status: ${resp.status}`);
-    }
-    const data = await resp.json();
-    
-    const mundial = data.mundial_actual;
-    const historia = data.historia;
-
-    // Generar listas HTML a partir de los datos
-    const listaGanadores = historia.maximos_ganadores.map(g => `<li><b>${g.pais}:</b> ${g.titulos} títulos</li>`).join('');
-    const listaCuriosidades = historia.datos_curiosos_historicos.map(c => `<li>${c}</li>`).join('');
-
-    cont.innerHTML = `
-      <h2>${mundial.nombre}</h2>
-      <p><b>Sedes:</b> ${mundial.sedes.join(', ')}</p>
-      <p><b>Equipos participantes:</b> ${mundial.equipos}</p>
-      <ul>${mundial.curiosidades.map(c => `<li>${c}</li>`).join('')}</ul>
-      
-      <hr>
-
-      <h2>Historia de los Mundiales</h2>
-      
-      <h3>Primer Mundial: ${historia.primer_mundial.sede} ${historia.primer_mundial.año}</h3>
-      <p>${historia.primer_mundial.dato}</p>
-
-      <h3>Máximos Ganadores</h3>
-      <ul>${listaGanadores}</ul>
-
-      <h3>Récords de Jugadores</h3>
-      <ul>
-        <li><b>Máximo Goleador:</b> ${historia.records_jugadores.maximo_goleador_historico.nombre} (${historia.records_jugadores.maximo_goleador_historico.goles} goles).</li>
-        <li><b>Más Partidos Jugados:</b> ${historia.records_jugadores.mas_partidos_jugados.nombre} (${historia.records_jugadores.mas_partidos_jugados.partidos} partidos).</li>
-        <li><b>Más Mundiales Jugados (5):</b> ${historia.records_jugadores.mas_mundiales_jugados.nombre}.</li>
-        <li><b>Campeón más Joven:</b> ${historia.records_jugadores.campeon_mas_joven.nombre} con ${historia.records_jugadores.campeon_mas_joven.edad} en ${historia.records_jugadores.campeon_mas_joven.año}.</li>
-      </ul>
-
-      <h3>Datos Curiosos Históricos</h3>
-      <ul>${listaCuriosidades}</ul>
-    `;
-  } catch (e) {
-    console.error("Error al cargar datos:", e);
-    cont.innerHTML = '<p style="color:red">No se pudieron cargar los datos. Revisa la consola para más detalles.</p>';
-  }
-}
-function cerrarModalDatos() {
-  document.getElementById('modal-datos').style.display = 'none';
-}
-// Asignar evento al botón de datos
-window.addEventListener('DOMContentLoaded', function() {
-  const btnDatos = document.querySelector('#botones-interaccion #datos');
-  if (btnDatos) {
-    btnDatos.addEventListener('click', mostrarModalDatos);
-  }
-});
-
-// --- MODAL DATOS DEL PAÍS DETECTADO ---
-let paisDetectadoActual = null;
-
-async function mostrarDatosPais() {
-  if (!paisDetectadoActual) return;
-  
-  const modal = document.getElementById('modal-pais-detectado');
-  const cont = document.getElementById('contenido-pais-detectado');
-  cont.innerHTML = '<p>Cargando datos del país...</p>';
-  modal.style.display = 'flex';
-
-  try {
-    const resp = await fetch('datos.json');
-    if (!resp.ok) {
-      throw new Error(`HTTP error! status: ${resp.status}`);
-    }
-    const data = await resp.json();
-    
-    const paisData = data[paisDetectadoActual];
-    if (paisData) {
-      cont.innerHTML = `
-        <div style="text-align: center; margin-bottom: 20px;">
-          <h2 style="color: #18510c; margin-bottom: 10px; font-size: 1.8rem;">${paisDetectadoActual}</h2>
-          <div style="width: 50px; height: 3px; background: #18510c; margin: 0 auto;"></div>
-        </div>
-        
-        <div style="display: grid; gap: 15px;">
-          <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #18510c;">
-            <h3 style="color: #ffffff; margin-bottom: 8px; font-size: 1.1rem;">🏛️ Capital</h3>
-            <p style="margin: 0; color: #e0e0e0;">${paisData.capital}</p>
-          </div>
-          
-          <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #18510c;">
-            <h3 style="color: #ffffff; margin-bottom: 8px; font-size: 1.1rem;">🌍 Continente</h3>
-            <p style="margin: 0; color: #e0e0e0;">${paisData.continente}</p>
-          </div>
-          
-          <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #18510c;">
-            <h3 style="color: #ffffff; margin-bottom: 8px; font-size: 1.1rem;">🏆 Mejor resultado en Mundial</h3>
-            <p style="margin: 0; color: #e0e0e0;">${paisData.mejor_mundial}</p>
-          </div>
-          
-          <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #ff6b35;">
-            <h3 style="color: #ffffff; margin-bottom: 8px; font-size: 1.1rem;">💡 Dato Curioso</h3>
-            <p style="margin: 0; color: #e0e0e0; line-height: 1.5;">${paisData.dato_curioso}</p>
-          </div>
-        </div>
-      `;
-    } else {
-      cont.innerHTML = `
-        <h2 style="color: #18510c; text-align: center;">${paisDetectadoActual}</h2>
-        <p style="text-align: center; color: #cccccc;">No se encontraron datos para este país en nuestra base de datos.</p>
-      `;
-    }
-  } catch (e) {
-    console.error("Error al cargar datos del país:", e);
-    cont.innerHTML = '<p style="color:red; text-align: center;">Error al cargar los datos del país.</p>';
-  }
-}
-
-function cerrarModalPais() {
-  document.getElementById('modal-pais-detectado').style.display = 'none';
-}
-// --- MODAL VIDEO ---
-let videoActual = 0;
-let videoActivo = false;
 const videosDisponibles = [
   "https://www.youtube.com/embed/DQtvjqm-xxI?si=fKmFhnoC2-x7ld6o&autoplay=1&mute=1",
   "https://www.youtube.com/embed/aK_850XXqTA?si=j9OCrbC-nZdok0nX&autoplay=1&mute=1",
-  "https://www.youtube.com/embed/xEGizIl9yt4?si=lUZl9YzWeDx6H4tn&autoplay=1&mute=1", 
+  "https://www.youtube.com/embed/xEGizIl9yt4?si=lUZl9YzWeDx6H4tn&autoplay=1&mute=1",
   "https://www.youtube.com/embed/kjryZta6rMs?si=yD4LXJLS-VBVsw7s&autoplay=1&mute=1",
   "https://www.youtube.com/embed/HIbpTQoRp3o?si=Iw7ltzM6joPanStx&autoplay=1&mute=1",
   "https://www.youtube.com/embed/0iFtX2oMeC0?si=J1xCPaMeinvxV2tC&autoplay=1&mute=1",
   "https://www.youtube.com/embed/OtOrP362h44?si=jcSirJu4LNQDsaFd&autoplay=1&mute=1",
-  "https://www.youtube.com/embed/nxWR-odH7Ck?si=_LhC09-8GGjlM7k3&autoplay=1&mute=",
+  "https://www.youtube.com/embed/nxWR-odH7Ck?si=_LhC09-8GGjlM7k3&autoplay=1&mute=1",
   "https://www.youtube.com/embed/Z_EbSQXs4aA?si=lmJhQMh0AABt0rby&autoplay=1&mute=1",
   "https://www.youtube.com/embed/HAiTNTTb-Q4?si=-nbVm923rU6gZj76&autoplay=1&mute=1",
   "https://www.youtube.com/embed/pMDo_xz5Uso?si=ghVXjX-zmE6UpWPP&autoplay=1&mute=1",
@@ -227,586 +44,1099 @@ const videosDisponibles = [
   "https://www.youtube.com/embed/GV75CzkOj-A?si=09LZhI6CLAH5bsmH&autoplay=1&mute=1",
   "https://www.youtube.com/embed/9EidzDKgglo?si=TjAcZ-2huNxQIbYy&autoplay=1&mute=1",
   "https://www.youtube.com/embed/FBfGUNSrid4?si=7ic4YQuOyypZvomz&autoplay=1&mute=1"
-
 ];
 
-function mostrarModalVideo() {
-  videoActivo = true;
-  document.getElementById('modal-video').style.display = 'flex';
-  document.getElementById('btn-modal-video').style.display = 'flex';
-  cargarVideo(videoActual);
+const VIDEO_FILTERS = {
+  original: "none",
+  sepia: "sepia(70%) saturate(120%)",
+  bn: "grayscale(100%) contrast(110%)",
+  vibrante: "hue-rotate(25deg) saturate(190%)"
+};
+
+let videoActual = 0;
+let videoActivo = false;
+let videoFilter = "original";
+
+let tfModel = null;
+let raSessionActive = false;
+let raPredictionInterval = null;
+let raScene = null;
+let raCamera = null;
+let raRenderer = null;
+let currentModel = null;
+let mixer = null;
+let clock = null;
+let pausarDeteccion = false;
+let videoStream = null;
+let animationFrameId = null;
+let ctx = null;
+let resizeObserver = null;
+
+let paisDetectadoActual = null;
+let contadorDeteccionSostenida = 0;
+const DETECCIONES_REQUERIDAS = 3; // Número de detecciones consecutivas antes de cambiar
+
+const UI = {
+  viewer: null,
+  stage: null,
+  stagePlaceholder: null,
+  video: null,
+  canvas3d: null,
+  frameCanvas: null,
+  detectionCard: null,
+  animacionCard: null,
+  nombreBandera: null,
+  valorConfianza: null,
+  controlHub: null,
+  hubToggle: null,
+  hubButtons: [],
+  panel: null,
+  panelTitle: null,
+  panelBody: null,
+  panelClose: null,
+  startButton: null,
+  diagnosticButton: null
+};
+
+let currentPanelAction = null;
+
+document.addEventListener('DOMContentLoaded', init);
+
+function init() {
+  UI.viewer = document.querySelector('.ra-viewer');
+  UI.stage = document.querySelector('.ra-viewer__stage');
+  UI.stagePlaceholder = document.getElementById('stage-placeholder');
+  UI.video = document.getElementById('video');
+  UI.canvas3d = document.getElementById('canvas3d');
+  UI.frameCanvas = document.getElementById('frameCanvas');
+  UI.detectionCard = document.getElementById('deteccion-info');
+  UI.animacionCard = document.getElementById('animacion-progreso');
+  UI.nombreBandera = document.getElementById('nombre-bandera');
+  UI.valorConfianza = document.getElementById('valor-confianza');
+  UI.controlHub = document.getElementById('control-hub');
+  UI.hubToggle = document.getElementById('hub-toggle');
+  UI.hubButtons = Array.from(document.querySelectorAll('.hub-btn'));
+  UI.panel = document.getElementById('info-panel');
+  UI.panelTitle = document.getElementById('panel-title');
+  UI.panelBody = document.getElementById('panel-body');
+  UI.panelClose = document.getElementById('panel-close');
+  UI.startButton = document.getElementById('btn-iniciar-modelo');
+  UI.diagnosticButton = document.getElementById('btn-diagnostico');
+
+  setupHub();
+  setupStageObservers();
+  bindControlButtons();
+
+  setStageMode('idle');
+  setPanelEmptyState();
 }
 
-function cerrarModalVideo() {
-  videoActivo = false;
-  document.getElementById('modal-video').style.display = 'none';
-  document.getElementById('btn-modal-video').style.display = 'none';
-  // Resetear filtros
-  const iframe = document.getElementById('video-mundial');
-  iframe.style.filter = "none";
+function setupHub() {
+  if (!UI.controlHub) return;
+
+  UI.hubToggle?.addEventListener('click', () => {
+    UI.controlHub.classList.toggle('is-open');
+    UI.hubToggle.setAttribute('aria-expanded', UI.controlHub.classList.contains('is-open'));
+  });
+
+  UI.hubButtons.forEach((btn) => {
+    btn.addEventListener('click', () => handleAction(btn.dataset.action));
+  });
+
+  UI.panelClose?.addEventListener('click', closePanel);
+}
+
+function setupStageObservers() {
+  if (!UI.stage || typeof ResizeObserver === 'undefined') return;
+  resizeObserver = new ResizeObserver(updateRendererSize);
+  resizeObserver.observe(UI.stage);
+}
+
+function bindControlButtons() {
+  UI.startButton?.addEventListener('click', triggerModelAnimation);
+  UI.diagnosticButton?.addEventListener('click', triggerDiagnostic);
+}
+
+function handleAction(action) {
+  if (!action) return;
+
+  if (action === 'animar') {
+    triggerModelAnimation();
+    flashHubButton(action);
+    return;
+  }
+
+  if (action === 'diagnostico') {
+    triggerDiagnostic();
+    flashHubButton(action);
+    return;
+  }
+
+  if (currentPanelAction && currentPanelAction !== action) {
+    cleanupPanel(currentPanelAction);
+  }
+
+  if (action === 'animacion') {
+    setActiveHubButton(action);
+    startRA();
+    return;
+  }
+
+  detenerRA();
+  setActiveHubButton(action);
+  setStageMode('panel');
+
+  switch (action) {
+    case 'video':
+      renderVideoPanel();
+      break;
+    case 'datos':
+      renderDatosPanel();
+      break;
+    case 'trivia':
+      renderTriviaPanel();
+      break;
+    default:
+      setPanelEmptyState();
+      break;
+  }
+}
+
+function flashHubButton(action) {
+  const button = UI.hubButtons.find((btn) => btn.dataset.action === action);
+  if (!button) return;
+  button.classList.add('is-flash');
+  setTimeout(() => button.classList.remove('is-flash'), 450);
+}
+
+function setActiveHubButton(action) {
+  UI.hubButtons.forEach((btn) => {
+    const isActive = Boolean(action && btn.dataset.action === action);
+    btn.classList.toggle('hub-btn--active', isActive);
+    btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+  });
+}
+
+function cleanupPanel(action) {
+  if (!action) return;
+
+  UI.panel?.classList.remove('ra-panel--overlay');
+
+  switch (action) {
+    case 'video': {
+      const iframe = document.getElementById('video-mundial');
+      if (iframe) {
+        iframe.src = '';
+      }
+      videoActivo = false;
+      break;
+    }
+    case 'trivia':
+      preguntasTrivia = [];
+      indiceTrivia = 0;
+      aciertosTrivia = 0;
+      break;
+    default:
+      break;
+  }
+}
+
+function setStageMode(mode) {
+  if (UI.viewer) {
+    UI.viewer.dataset.mode = mode;
+    UI.viewer.classList.toggle('show-panel', mode === 'panel');
+  }
+
+  if (UI.stage) {
+    UI.stage.dataset.mode = mode;
+  }
+
+  if (UI.stagePlaceholder) {
+    UI.stagePlaceholder.hidden = mode !== 'idle';
+  }
+
+  if (mode === 'panel') {
+    if (UI.video) UI.video.style.display = 'none';
+    if (UI.canvas3d) UI.canvas3d.style.display = 'none';
+    if (UI.frameCanvas) UI.frameCanvas.style.display = 'none';
+    if (UI.startButton) UI.startButton.style.display = 'none';
+    if (UI.diagnosticButton) UI.diagnosticButton.style.display = 'none';
+    hideDetectionCards();
+    return;
+  }
+
+  const isRA = mode === 'ra';
+  if (UI.video) {
+    UI.video.style.display = isRA ? 'block' : 'none';
+    UI.video.style.visibility = isRA ? 'visible' : 'hidden';
+  }
+  if (UI.canvas3d) UI.canvas3d.style.display = isRA ? 'block' : 'none';
+  if (UI.frameCanvas) UI.frameCanvas.style.display = 'none';
+
+  if (!isRA) {
+    if (UI.startButton) UI.startButton.style.display = 'none';
+    if (UI.diagnosticButton) UI.diagnosticButton.style.display = 'none';
+    hideDetectionCards();
+  }
+}
+
+function setPanelEmptyState() {
+  currentPanelAction = null;
+
+  if (UI.panel) {
+    UI.panel.classList.remove('is-open');
+    UI.panel.classList.remove('ra-panel--overlay');
+  }
+
+  UI.viewer?.classList.remove('show-panel');
+
+  if (UI.panelTitle) {
+    UI.panelTitle.textContent = 'Explorador mundialista';
+  }
+
+  if (UI.panelBody) {
+    UI.panelBody.innerHTML = '<p class="panel-empty">Selecciona un módulo en el dock inferior para mostrar contenido aquí.</p>';
+  }
+}
+
+function openPanel(action, title, content) {
+  currentPanelAction = action;
+
+  if (action) {
+    setActiveHubButton(action);
+  }
+
+  if (UI.panel) {
+    UI.panel.classList.remove('ra-panel--overlay');
+    UI.panel.classList.add('is-open');
+  }
+
+  if (action !== 'animacion') {
+    setStageMode('panel');
+  }
+
+  if (UI.panelTitle) {
+    UI.panelTitle.textContent = title;
+  }
+
+  if (UI.panelBody) {
+    UI.panelBody.innerHTML = content;
+  }
+}
+
+function closePanel() {
+  const previousAction = currentPanelAction;
+  cleanupPanel(previousAction);
+  setPanelEmptyState();
+
+  if (raSessionActive) {
+    setActiveHubButton('animacion');
+    setStageMode('ra');
+  } else {
+    setActiveHubButton(null);
+    setStageMode('idle');
+  }
+}
+
+function setPanelLoading(action, title, message) {
+  const html = `
+    <section class="panel-section panel-loading">
+      <span class="panel-pill"><i class="fa-solid fa-circle-notch fa-spin"></i> ${title}</span>
+      <p>${message}</p>
+    </section>`;
+
+  openPanel(action, title, html);
+
+  if (action === 'animacion') {
+    UI.panel?.classList.add('ra-panel--overlay');
+  }
+}
+
+function renderRAInstructions() {
+  const html = `
+    <section class="panel-section">
+      <span class="panel-pill"><i class="fa-solid fa-camera"></i> Preparación</span>
+      <ul class="panel-list">
+        <li class="panel-list__item">
+          <span class="panel-list__icon"><i class="fa-solid fa-person-chalkboard"></i></span>
+          <div class="panel-meta">
+            <strong>Ubica la bandera</strong>
+            <span>Coloca la bandera dentro del recuadro y evita movimientos bruscos.</span>
+          </div>
+        </li>
+        <li class="panel-list__item">
+          <span class="panel-list__icon"><i class="fa-solid fa-lightbulb"></i></span>
+          <div class="panel-meta">
+            <strong>Permite buena iluminación</strong>
+            <span>La detección funciona mejor con luz uniforme.</span>
+          </div>
+        </li>
+        <li class="panel-list__item">
+          <span class="panel-list__icon"><i class="fa-solid fa-circle-play"></i></span>
+          <div class="panel-meta">
+            <strong>Activa la animación</strong>
+            <span>Después de detectar una bandera puedes usar el botón “Animar” para ver el modelo 3D.</span>
+          </div>
+        </li>
+      </ul>
+    </section>`;
+
+  openPanel('animacion', 'Escaneo en tiempo real', html);
+  UI.panel?.classList.add('ra-panel--overlay');
+}
+
+async function renderDatosPanel() {
+  setPanelLoading('datos', 'Atlas mundialista', 'Cargando datos oficiales del torneo...');
+
+  try {
+    const resp = await fetch('datos_mundial.json');
+    if (!resp.ok) {
+      throw new Error(`HTTP ${resp.status}`);
+    }
+
+    const data = await resp.json();
+    const mundialActual = data.mundial_actual || {};
+    const historia = data.historia || {};
+    const primerMundial = historia.primer_mundial || {};
+  const resumenPrimerMundial = [primerMundial.sede, primerMundial.campeon].filter(Boolean).join(' — ');
+    const maximosGanadores = Array.isArray(historia.maximos_ganadores) ? historia.maximos_ganadores : [];
+    const curiosidadesHistoricas = Array.isArray(historia.datos_curiosos_historicos) ? historia.datos_curiosos_historicos : [];
+    const curiosidadesActuales = Array.isArray(mundialActual.curiosidades) ? mundialActual.curiosidades : [];
+    const records = historia.records_jugadores || {};
+
+    const ganadoresHtml = maximosGanadores
+      .map(({ pais, titulos }) => `
+        <li class="panel-list__item">
+          <span class="panel-list__icon"><i class="fa-solid fa-trophy"></i></span>
+          <div class="panel-meta">
+            <strong>${pais}</strong>
+            <span>${titulos} títulos mundiales</span>
+          </div>
+        </li>`)
+      .join('');
+
+    const curiosidadesActualesHtml = curiosidadesActuales
+      .map((dato) => `<li>${dato}</li>`)
+      .join('');
+
+    const curiosidadesHistoricasHtml = curiosidadesHistoricas
+      .map((dato) => `<li>${dato}</li>`)
+      .join('');
+
+    const recordLabels = {
+      maximo_goleador_historico: 'Máximo goleador histórico',
+      mas_partidos_jugados: 'Más partidos disputados',
+      mas_mundiales_jugados: 'Más mundiales jugados',
+      campeon_mas_joven: 'Campeón más joven'
+    };
+
+    const recordsHtml = Object.entries(records)
+      .map(([clave, info]) => {
+        if (!info) return '';
+        const datos = [info.goles ? `${info.goles} goles` : null,
+          info.partidos ? `${info.partidos} partidos` : null,
+          info.cantidad ? `${info.cantidad} participaciones` : null,
+          info.edad || null,
+          info.año ? `(${info.año})` : null,
+          info.pais || null]
+          .filter(Boolean)
+          .join(' • ');
+        const descripcion = datos || info.dato || '';
+        return `
+          <li class="panel-list__item">
+            <span class="panel-list__icon"><i class="fa-solid fa-star"></i></span>
+            <div class="panel-meta">
+              <strong>${recordLabels[clave] || clave}</strong>
+              <span>${info.nombre ? `${info.nombre}${descripcion ? ' — ' : ''}` : ''}${descripcion}</span>
+            </div>
+          </li>`;
+      })
+      .join('');
+
+    const interesBandera = Boolean(paisDetectadoActual);
+    const seguimientoHtml = `
+      <section class="panel-section">
+        <span class="panel-pill"><i class="fa-solid fa-magnifying-glass"></i> Seguimiento RA</span>
+        <p>${interesBandera ? `Última bandera detectada: <strong>${paisDetectadoActual}</strong>. Accede a su ficha completa.` : 'Escanea una bandera para habilitar su ficha detallada mientras exploras el Atlas.'}</p>
+        <button type="button" class="chip" data-action="mostrar-datos-deteccion"${interesBandera ? '' : ' disabled'}>
+          <i class="fa-solid fa-compass"></i>
+          <span>Ver datos de la bandera detectada</span>
+        </button>
+      </section>`;
+
+    const html = `
+      <section class="panel-section">
+        <span class="panel-pill"><i class="fa-solid fa-earth-americas"></i> Mundial 2026</span>
+        <h3>${mundialActual.nombre || 'Copa Mundial de la FIFA 2026'}</h3>
+        <p><strong>Fechas:</strong> ${mundialActual.fecha || 'Por confirmar'}</p>
+        <p><strong>Sedes anfitrionas:</strong> ${(mundialActual.sedes || []).join(', ') || 'Por confirmar'}</p>
+        <p><strong>Equipos participantes:</strong> ${mundialActual.equipos || '—'}</p>
+        ${curiosidadesActualesHtml ? `<ul>${curiosidadesActualesHtml}</ul>` : ''}
+      </section>
+      <section class="panel-section">
+        <span class="panel-pill"><i class="fa-solid fa-medal"></i> Palmarés histórico</span>
+        ${ganadoresHtml ? `<ul class="panel-list">${ganadoresHtml}</ul>` : '<p class="panel-empty">No hay registros históricos disponibles.</p>'}
+      </section>
+      <section class="panel-section">
+        <span class="panel-pill"><i class="fa-solid fa-clock-rotate-left"></i> Historia del torneo</span>
+        <p><strong>Primer mundial (${primerMundial.año || '—'})</strong>: ${resumenPrimerMundial || 'Información no disponible'}</p>
+        ${primerMundial.dato ? `<p>${primerMundial.dato}</p>` : ''}
+        ${recordsHtml ? `<ul class="panel-list">${recordsHtml}</ul>` : '<p class="panel-empty">No hay récords destacados registrados.</p>'}
+        ${curiosidadesHistoricasHtml ? `<ul>${curiosidadesHistoricasHtml}</ul>` : ''}
+      </section>
+      ${seguimientoHtml}`;
+
+    openPanel('datos', 'Atlas mundialista', html);
+
+    const botonDetalle = UI.panelBody?.querySelector('[data-action="mostrar-datos-deteccion"]');
+    if (botonDetalle && !botonDetalle.hasAttribute('disabled')) {
+      botonDetalle.addEventListener('click', mostrarDatosPais);
+    }
+  } catch (error) {
+    console.error('Error al cargar datos globales del mundial:', error);
+    openPanel('datos', 'Atlas mundialista', '<p class="panel-empty">No se pudo cargar la información. Intenta nuevamente.</p>');
+  }
+}
+
+async function renderTriviaPanel() {
+  setPanelLoading('trivia', 'Trivia mundialista', 'Preparando nuevas preguntas...');
+  await loadTrivia();
+}
+
+async function loadTrivia() {
+  try {
+    const resp = await fetch('trivia.json');
+    if (!resp.ok) {
+      throw new Error(`HTTP ${resp.status}`);
+    }
+
+    const data = await resp.json();
+    const todasLasPreguntas = data.preguntas || [];
+
+    if (!todasLasPreguntas.length) {
+      openPanel('trivia', 'Trivia mundialista', '<p class="panel-empty">No hay preguntas disponibles por el momento.</p>');
+      return;
+    }
+
+    const preguntasAleatorias = [];
+    const indicesUsados = new Set();
+    while (preguntasAleatorias.length < 5 && preguntasAleatorias.length < todasLasPreguntas.length) {
+      const indice = Math.floor(Math.random() * todasLasPreguntas.length);
+      if (!indicesUsados.has(indice)) {
+        indicesUsados.add(indice);
+        preguntasAleatorias.push(todasLasPreguntas[indice]);
+      }
+    }
+
+    preguntasTrivia = preguntasAleatorias;
+    indiceTrivia = 0;
+    aciertosTrivia = 0;
+
+    renderTriviaQuestion();
+  } catch (error) {
+    console.error('Error al cargar la trivia:', error);
+    openPanel('trivia', 'Trivia mundialista', '<p class="panel-empty">No se pudo cargar la trivia. Revisa tu conexión e intenta otra vez.</p>');
+  }
+}
+
+function renderTriviaQuestion() {
+  if (!preguntasTrivia.length) {
+    openPanel('trivia', 'Trivia Mundialista', '<p class="panel-empty">No hay preguntas disponibles.</p>');
+    return;
+  }
+
+  if (indiceTrivia >= preguntasTrivia.length) {
+    renderTriviaSummary();
+    return;
+  }
+
+  const pregunta = preguntasTrivia[indiceTrivia];
+  const html = `
+    <section class="panel-section trivia-card">
+      <div class="trivia-meta">
+        <span class="panel-pill"><i class="fa-solid fa-question"></i> Pregunta ${indiceTrivia + 1}/${preguntasTrivia.length}</span>
+        <span>Aciertos: ${aciertosTrivia}</span>
+      </div>
+      <h3>${pregunta.pregunta}</h3>
+      <div class="trivia-options">
+        ${pregunta.opciones.map((opcion, idx) => `<button type="button" data-answer="${idx}">${opcion}</button>`).join('')}
+      </div>
+    </section>`;
+
+  openPanel('trivia', 'Trivia Mundialista', html);
+
+  UI.panelBody?.querySelectorAll('.trivia-options button').forEach((btn) => {
+    btn.addEventListener('click', () => handleTriviaAnswer(Number(btn.dataset.answer)));
+  });
+}
+
+function handleTriviaAnswer(indiceOpcion) {
+  const pregunta = preguntasTrivia[indiceTrivia];
+  if (!pregunta) return;
+
+  if (indiceOpcion === pregunta.respuesta) {
+    aciertosTrivia++;
+  }
+
+  indiceTrivia++;
+  renderTriviaQuestion();
+}
+
+function renderTriviaSummary() {
+  const html = `
+    <section class="panel-section trivia-card trivia-summary">
+      <span class="panel-pill"><i class="fa-solid fa-trophy"></i> Resultado final</span>
+      <strong>${aciertosTrivia} / ${preguntasTrivia.length}</strong>
+      <p>¡Gracias por participar! ¿Quieres volver a intentarlo con nuevas preguntas?</p>
+      <button type="button" class="chip" data-action="retry-trivia">Reintentar trivia</button>
+    </section>`;
+
+  openPanel('trivia', 'Trivia Mundialista', html);
+  UI.panelBody?.querySelector('[data-action="retry-trivia"]').addEventListener('click', renderTriviaPanel);
+}
+
+function renderVideoPanel() {
+  const html = `
+    <section class="panel-section panel-video">
+      <span class="panel-pill"><i class="fa-solid fa-play"></i> Highlights 2026</span>
+      <div class="video-frame">
+        <iframe id="video-mundial" title="Video del Mundial" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+      </div>
+      <div class="panel-video__controls">
+        <button type="button" data-video-nav="-1"><i class="fa-solid fa-chevron-left"></i><span>Anterior</span></button>
+        <button type="button" data-video-nav="1"><span>Siguiente</span><i class="fa-solid fa-chevron-right"></i></button>
+      </div>
+      <hr class="panel-divider">
+      <p>Ajusta el estilo del video para adaptarlo a la ambientación que prefieras.</p>
+      <div class="panel-video__filters">
+        <button type="button" data-filter="original" class="is-active"><i class="fa-regular fa-circle"></i><span>Original</span></button>
+        <button type="button" data-filter="sepia"><i class="fa-solid fa-sun"></i><span>Sepia cálida</span></button>
+        <button type="button" data-filter="bn"><i class="fa-solid fa-circle-half-stroke"></i><span>Blanco y negro</span></button>
+        <button type="button" data-filter="vibrante"><i class="fa-solid fa-star"></i><span>Vibrante</span></button>
+      </div>
+    </section>`;
+
+  openPanel('video', 'Highlights del Mundial', html);
+  bindVideoPanelEvents();
+  videoActivo = true;
+  cargarVideo(videoActual);
+  applyVideoFilter(videoFilter);
+}
+
+function bindVideoPanelEvents() {
+  UI.panelBody?.querySelectorAll('[data-video-nav]').forEach((btn) => {
+    btn.addEventListener('click', () => cambiarVideo(Number(btn.dataset.videoNav)));
+  });
+
+  UI.panelBody?.querySelectorAll('.panel-video__filters button').forEach((btn) => {
+    btn.addEventListener('click', () => applyVideoFilter(btn.dataset.filter));
+  });
 }
 
 function cargarVideo(indice) {
-  if (indice >= 0 && indice < videosDisponibles.length) {
-    const iframe = document.getElementById('video-mundial');
-    iframe.src = videosDisponibles[indice];
-    videoActual = indice;
-  }
+  const iframe = document.getElementById('video-mundial');
+  if (!iframe) return;
+  if (indice < 0 || indice >= videosDisponibles.length) return;
+  videoActual = indice;
+  iframe.src = videosDisponibles[indice];
 }
 
 function cambiarVideo(direccion) {
   if (!videoActivo) return;
-  
   let nuevoIndice = videoActual + direccion;
   if (nuevoIndice < 0) {
     nuevoIndice = videosDisponibles.length - 1;
   } else if (nuevoIndice >= videosDisponibles.length) {
     nuevoIndice = 0;
   }
-  
   cargarVideo(nuevoIndice);
+  applyVideoFilter(videoFilter);
 }
 
-function filtro1() {
-  if (!videoActivo) return;
+function applyVideoFilter(filterKey) {
+  videoFilter = filterKey || 'original';
   const iframe = document.getElementById('video-mundial');
-  iframe.style.filter = "hue-rotate(180deg) saturate(300%)";
+  if (iframe) {
+    iframe.style.filter = VIDEO_FILTERS[videoFilter] || 'none';
+  }
+
+  UI.panelBody?.querySelectorAll('.panel-video__filters button').forEach((btn) => {
+    btn.classList.toggle('is-active', btn.dataset.filter === videoFilter);
+  });
 }
 
-function filtro2() {
-  if (!videoActivo) return;
-  const iframe = document.getElementById('video-mundial');
-  iframe.style.filter = "sepia(80%) saturate(150%)";
-}
+async function mostrarDatosPais() {
+  if (!paisDetectadoActual || !UI.panel) return;
 
-function filtro3() {
-  if (!videoActivo) return;
-  const iframe = document.getElementById('video-mundial');
-  iframe.style.filter = "invert(100%)";
-}
-
-// --- INICIO RA ---
-
-// Variables para animación
-let mixer = null;
-let clock = null;
-let pausarDeteccion = false;
-let tiempoAnimacion = 3000; // 3 segundos de pausa por defecto
-
-function RAbegin() {
-  // Limpiar variables globales al iniciar
-  currentModel = null;
-  mixer = null;
-  pausarDeteccion = false;
-  paisDetectadoActual = null;
-  
-  // Mostrar botones extra para animar modelo y diagnóstico
-  const btnIniciarModelo = document.getElementById('btn-iniciar-modelo');
-  const btnDiagnostico = document.getElementById('btn-diagnostico');
-  if (btnIniciarModelo) btnIniciarModelo.style.display = '';
-  if (btnDiagnostico) btnDiagnostico.style.display = '';
-  let model;
-  let scene, camera, renderer;
-  // Configuración de banderas y sus modelos 3D correspondientes
-  let modelo = "3D_model/F2.glb";
-  let banderasConfig = {
-    0: { nombre: "Mexico", textura: "3D_model/textures/Mexico.png" },
-    1: { nombre: "USA", textura: "3D_model/textures/USA.png" },
-    2: { nombre: "Canada", textura: "3D_model/textures/Canada.png" },
-    3: { nombre: "Japon", textura: "3D_model/textures/Japon.png" },
-    4: { nombre: "Nueva Zelanda", textura: "3D_model/textures/Nueva_Zelanda.png" },
-    5: { nombre: "Iran", textura: "3D_model/textures/Iran.png" },
-    6: { nombre: "Argentina", textura: "3D_model/textures/Argentina.png" },
-    7: { nombre: "Uzbekistan", textura: "3D_model/textures/Urbekistan.png" },
-    8: { nombre: "Corea", textura: "3D_model/textures/Corea.png" },
-    9: { nombre: "Jordania", textura: "3D_model/textures/Jordania.png" },
-    10: { nombre: "Australia", textura: "3D_model/textures/Australia.png" },
-    11: { nombre: "Brasil", textura: "3D_model/textures/Brasil.png" },
-    12: { nombre: "Ecuador", textura: "3D_model/textures/Ecuador.png" },
-     13: { nombre: "Colombia", textura: "3D_model/textures/Colombia.png" },
-    14: { nombre: "Paraguay", textura: "3D_model/textures/Paraguay.png" },
-    15: { nombre: "Uruguay", textura: "3D_model/textures/Uruguay.png" },
-    16: { nombre: "Marruecos", textura: "3D_model/textures/Marruecos.png" },
-    17: { nombre: "Tunez", textura: "3D_model/textures/Tunez.png" }
+  UI.panel.classList.add('is-open');
+  UI.panel.classList.add('ra-panel--overlay');
+  UI.viewer?.classList.remove('show-panel');
+  if (UI.panelTitle) {
+    UI.panelTitle.textContent = `Selección detectada: ${paisDetectadoActual}`;
   }
-  // Inicializar Three.js
-  function inicializarThreeJS() {
-    const canvas3d = document.getElementById('canvas3d');
-    scene = new THREE.Scene();
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.z = 5;
-    renderer = new THREE.WebGLRenderer({
-      canvas: canvas3d,
-      alpha: true,
-      antialias: true
-    });
-    renderer.setSize(window.innerWidth, window.innerHeight - 60);
-    renderer.setClearColor(0x000000, 0);
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-    scene.add(ambientLight);
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-    directionalLight.position.set(1, 1, 1);
-    scene.add(directionalLight);
-    clock = new THREE.Clock();
-    animate();
+  if (UI.panelBody) {
+    UI.panelBody.innerHTML = '<p class="panel-empty">Buscando información del país...</p>';
   }
 
-  function animate() {
-    requestAnimationFrame(animate);
-    // El modelo se mantiene quieto cuando hay una bandera detectada
-    // Solo rota si no hay detección activa (puedes comentar estas líneas si no quieres rotación)
-    // if (currentModel && !paisDetectadoActual) {
-    //   currentModel.rotation.y += 0.005;
-    // }
-    if (mixer) {
-      const delta = clock.getDelta();
-      mixer.update(delta);
+  try {
+    const resp = await fetch('datos.json');
+    if (!resp.ok) {
+      throw new Error(`HTTP ${resp.status}`);
     }
-    renderer.render(scene, camera);
-  }
+    const data = await resp.json();
+    const paisData = data[paisDetectadoActual];
 
-  // Función para limpiar completamente la escena
-  function limpiarEscena() {
-    if (currentModel) {
-      scene.remove(currentModel);
-      currentModel = null;
-    }
-    if (mixer) {
-      mixer.stopAllAction();
-      mixer.uncacheRoot(mixer.getRoot());
-      mixer = null;
-    }
-    pausarDeteccion = false;
-    console.log("Escena limpiada completamente");
-  }
-
-  async function cargarModelo() {
-    model = await tf.loadLayersModel("modeloIA/model.json");
-    console.log("Modelo de IA cargado");
-  }
-
-  async function cargarModelo3D(textura) {
-    // Verificar que se proporcione una textura válida
-    if (!textura) {
-      console.error("No se proporcionó textura para cargar el modelo");
+    if (!paisData) {
+      UI.panelBody.innerHTML = `<p class="panel-empty">No hay datos registrados para ${paisDetectadoActual}.</p>`;
       return;
     }
-    
-    console.log(`Cargando modelo 3D con textura: ${textura}`);
-    const loader = new THREE.GLTFLoader();
-    
-    // Eliminar modelo anterior si existe
-    if (currentModel) {
-      console.log("Eliminando modelo anterior");
-      scene.remove(currentModel);
-      currentModel = null;
-    }
-    
-    // Limpiar mixer anterior
-    if (mixer) {
-      console.log("Limpiando mixer anterior");
-      mixer.stopAllAction();
-      mixer.uncacheRoot(mixer.getRoot());
-      mixer = null;
-    }
-    try {
-      const gltf = await new Promise((resolve, reject) => {
-        loader.load(modelo, resolve, undefined, reject);
-      });
-      currentModel = gltf.scene;
-      currentModel.scale.set(1.5, 1.5, 1.5);
-      currentModel.position.set(0, -1, 0); // Ajuste para centrar el modelo verticalmente
-      currentModel.rotation.set(0, 0, 0); // Resetear rotación
-      const textureLoader = new THREE.TextureLoader();
-      const texture = textureLoader.load(textura);
-      currentModel.traverse((child) => {
-        if (child.isMesh) {
-          child.material.map = texture;
-          child.material.needsUpdate = true;
-        }
-      });
-      
-      // Guardar referencia a las animaciones en el modelo
-      if (gltf.animations && gltf.animations.length > 0) {
-        currentModel.animations = gltf.animations;
-      }
-      
-      scene.add(currentModel);
-      // Preparar animaciones si existen
-      if (gltf.animations && gltf.animations.length > 0) {
-        mixer = new THREE.AnimationMixer(currentModel);
-        console.log("Animaciones encontradas en el modelo:", gltf.animations.map(a => a.name));
-        
-        // Buscar diferentes nombres de animación posibles
-        const possibleNames = ['Wave', 'wave', 'Waving', 'waving', 'Animation', 'animation', 'Action', 'action'];
-        let foundClip = null;
-        
-        for (const name of possibleNames) {
-          foundClip = gltf.animations.find(a => a.name === name);
-          if (foundClip) {
-            console.log(`Encontrada animación: ${name}`);
-            break;
-          }
-        }
-        
-        // Si no encuentra por nombre, usar la primera animación disponible
-        if (!foundClip && gltf.animations.length > 0) {
-          foundClip = gltf.animations[0];
-          console.log(`Usando primera animación disponible: ${foundClip.name}`);
-        }
-        
-        if (foundClip) {
-          mixer.clipAction(foundClip).stop(); // No iniciar automáticamente
-        }
-      } else {
-        console.log("No se encontraron animaciones en el modelo");
-      }
-      console.log("Modelo 3D cargado:", modelo);
-    } catch (error) {
-      console.error("Error cargando modelo 3D:", error);
-      const geometry = new THREE.BoxGeometry(1, 1, 1);
-      const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-      currentModel = new THREE.Mesh(geometry, material);
-      scene.add(currentModel);
-    }
-  }
 
-  async function predecir() {
-    if (!model || pausarDeteccion) return; // No predecir si está pausado
-    ctx.drawImage(video, 0, 0, frameCanvas.width, frameCanvas.height);
-    const tensor = tf.browser.fromPixels(frameCanvas)
-      .resizeNearestNeighbor([224, 224])
-      .toFloat()
-      .div(255.0)
-      .expandDims();
-    const pred = await model.predict(tensor).data();
-    const maxProb = Math.max(...pred);
-    const banderaDetectada = pred.indexOf(maxProb);
-    const confianza = (maxProb * 100).toFixed(1);
-    const umbralConfianza = 0.7;
-    
-    // Debug logging para ver qué se está detectando
-    if (maxProb > 0.5) { // Umbral más bajo para debugging
-      console.log(`Detección: Índice ${banderaDetectada}, Confianza: ${confianza}%, País: ${banderasConfig[banderaDetectada] ? banderasConfig[banderaDetectada].nombre : 'Desconocido'}`);
-    }
-    if (maxProb > umbralConfianza && banderasConfig[banderaDetectada]) {
-      const config = banderasConfig[banderaDetectada];
-      
-      // Solo cargar el modelo si es diferente al actual
-      if (paisDetectadoActual !== config.nombre) {
-        console.log(`Nueva bandera detectada: ${config.nombre} (${confianza}%)`);
-        
-        document.getElementById('deteccion-info').style.display = 'block';
-        document.getElementById('nombre-bandera').textContent = config.nombre;
-        document.getElementById('valor-confianza').textContent = confianza + '%';
-        
-        // Guardar el país detectado para el modal de datos
-        paisDetectadoActual = config.nombre;
-        
-        await cargarModelo3D(config.textura);
-      } else {
-        // Solo actualizar la confianza si es el mismo país
-        document.getElementById('valor-confianza').textContent = confianza + '%';
-      }
-    } else {
-      document.getElementById('deteccion-info').style.display = 'none';
-      paisDetectadoActual = null; // Limpiar país detectado
-      
-      // Limpiar modelo y mixer cuando no hay detección
-      if (currentModel) {
-        scene.remove(currentModel);
-        currentModel = null;
-      }
-      if (mixer) {
-        mixer.stopAllAction();
-        mixer.uncacheRoot(mixer.getRoot());
-        mixer = null;
-      }
-    }
-    tensor.dispose();
-  }
+    const html = `
+      <section class="panel-section">
+        <span class="panel-pill"><i class="fa-solid fa-flag"></i> ${paisDetectadoActual}</span>
+        <ul class="panel-list">
+          <li class="panel-list__item">
+            <span class="panel-list__icon"><i class="fa-solid fa-landmark"></i></span>
+            <div class="panel-meta">
+              <strong>Capital</strong>
+              <span>${paisData.capital}</span>
+            </div>
+          </li>
+          <li class="panel-list__item">
+            <span class="panel-list__icon"><i class="fa-solid fa-earth-americas"></i></span>
+            <div class="panel-meta">
+              <strong>Continente</strong>
+              <span>${paisData.continente}</span>
+            </div>
+          </li>
+          <li class="panel-list__item">
+            <span class="panel-list__icon"><i class="fa-solid fa-trophy"></i></span>
+            <div class="panel-meta">
+              <strong>Mejor mundial</strong>
+              <span>${paisData.mejor_mundial}</span>
+            </div>
+          </li>
+          <li class="panel-list__item">
+            <span class="panel-list__icon"><i class="fa-solid fa-lightbulb"></i></span>
+            <div class="panel-meta">
+              <strong>Dato curioso</strong>
+              <span>${paisData.dato_curioso}</span>
+            </div>
+          </li>
+        </ul>
+      </section>`;
 
-  const video = document.getElementById("video");
-  const frameCanvas = document.getElementById("frameCanvas");
-  const ctx = frameCanvas.getContext("2d");
-
-  // Inicializar cámara trasera
-  const constraints = {
-    video: {
-      facingMode: { exact: "environment" }
-    }
-  };
-  navigator.mediaDevices.getUserMedia(constraints)
-    .then(stream => {
-      video.srcObject = stream;
-    })
-    .catch(error => {
-      console.error("Error accediendo a la cámara trasera:", error);
-      navigator.mediaDevices.getUserMedia({ video: true })
-        .then(stream => {
-          video.srcObject = stream;
-        })
-        .catch(fallbackError => {
-          console.error("Error accediendo a cualquier cámara:", fallbackError);
-          alert("No se pudo acceder a la cámara. Verifica los permisos.");
-        });
-    });
-  cargarModelo();
-  inicializarThreeJS();
-  
-  // Debug inicial
-  console.log("=== INICIO DEL MODO RA ===");
-  console.log("Estado inicial - currentModel:", currentModel);
-  console.log("Estado inicial - mixer:", mixer);
-  console.log("Estado inicial - paisDetectadoActual:", paisDetectadoActual);
-  window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight - 60);
-  });
-  // Esperar un poco antes de iniciar la predicción para evitar detecciones falsas
-  setTimeout(() => {
-    console.log("Iniciando predicción de banderas...");
-    setInterval(predecir, 500);
-  }, 2000); // Esperar 2 segundos
-  // Evento para animar el modelo 3D
-  if (btnIniciarModelo) {
-    btnIniciarModelo.onclick = function() {
-      if (mixer && currentModel) {
-        // Pausar la detección durante la animación
-        pausarDeteccion = true;
-        document.getElementById('animacion-progreso').style.display = 'block';
-        console.log("Detección pausada para ejecutar animación");
-        
-        // Buscar animación disponible de forma más flexible
-        const actions = mixer._actions || [];
-        let animationAction = null;
-        
-        // Lista de nombres posibles para la animación
-        const possibleNames = ['Wave', 'wave', 'Waving', 'waving', 'Animation', 'animation', 'Action', 'action'];
-        
-        // Buscar por nombre en las acciones existentes
-        for (const name of possibleNames) {
-          if (actions.length > 0) {
-            animationAction = actions.find(a => a._clip && a._clip.name === name);
-            if (animationAction) {
-              console.log(`Encontrada animación en acciones: ${name}`);
-              break;
-            }
-          }
-        }
-        
-        // Si no encontró en acciones, buscar en las animaciones del modelo
-        if (!animationAction && currentModel.animations) {
-          for (const name of possibleNames) {
-            const clip = currentModel.animations.find(a => a.name === name);
-            if (clip) {
-              animationAction = mixer.clipAction(clip);
-              console.log(`Creada acción para animación: ${name}`);
-              break;
-            }
-          }
-        }
-        
-        // Si aún no encontró, usar la primera animación disponible
-        if (!animationAction) {
-          if (actions.length > 0 && actions[0]._clip) {
-            animationAction = actions[0];
-            console.log(`Usando primera acción disponible: ${actions[0]._clip.name}`);
-          } else if (currentModel.animations && currentModel.animations.length > 0) {
-            animationAction = mixer.clipAction(currentModel.animations[0]);
-            console.log(`Usando primera animación del modelo: ${currentModel.animations[0].name}`);
-          }
-        }
-        
-        if (animationAction) {
-          // Detener todas las animaciones previas
-          mixer.stopAllAction();
-          
-          // Configurar la animación
-          animationAction.reset();
-          animationAction.setLoop(THREE.LoopOnce); // Solo reproducir una vez
-          animationAction.clampWhenFinished = true; // Mantener la pose final
-          animationAction.enabled = true;
-          animationAction.weight = 1;
-          
-          // Escuchar cuando termine la animación
-          const onAnimationFinished = () => {
-            setTimeout(() => {
-              pausarDeteccion = false;
-              document.getElementById('animacion-progreso').style.display = 'none';
-              console.log("Detección reanudada");
-              
-              // Resetear la animación después de terminar
-              if (animationAction) {
-                animationAction.reset();
-                animationAction.stop();
-              }
-            }, 500); // Pequeña pausa adicional después de la animación
-            
-            mixer.removeEventListener('finished', onAnimationFinished);
-          };
-          
-          mixer.addEventListener('finished', onAnimationFinished);
-          
-          // Reproducir animación
-          animationAction.play();
-          console.log(`Reproduciendo animación: ${animationAction._clip.name}`);
-          
-          // Timeout de seguridad en caso de que el evento no se dispare
-          setTimeout(() => {
-            if (pausarDeteccion) {
-              pausarDeteccion = false;
-              document.getElementById('animacion-progreso').style.display = 'none';
-              console.log("Detección reanudada por timeout de seguridad");
-              
-              // Resetear animación por seguridad
-              if (animationAction) {
-                animationAction.reset();
-                animationAction.stop();
-              }
-            }
-          }, tiempoAnimacion + 1000);
-          
-        } else {
-          // Si no hay animación, mostrar información detallada
-          console.log("=== DIAGNÓSTICO DE ANIMACIONES ===");
-          console.log("Acciones del mixer:", mixer._actions.map(a => a._clip ? a._clip.name : 'sin nombre'));
-          console.log("Animaciones del modelo:", currentModel.animations ? currentModel.animations.map(a => a.name) : 'ninguna');
-          
-          // Pausar detección por un momento para evitar interferencias
-          setTimeout(() => {
-            pausarDeteccion = false;
-            document.getElementById('animacion-progreso').style.display = 'none';
-          }, 1000);
-          
-          alert('No se encontraron animaciones en este modelo. Revisa la consola para más detalles.');
-        }
-      } else {
-        alert('Este modelo no tiene animaciones o no está cargado correctamente.');
-      }
-    }
-  }
-  
-  // Botón de diagnóstico
-  if (btnDiagnostico) {
-    btnDiagnostico.onclick = function() {
-      console.log("=== DIAGNÓSTICO COMPLETO DEL MODELO ===");
-      console.log("Modelo actual existe:", !!currentModel);
-      console.log("Mixer existe:", !!mixer);
-      console.log("Pausa de detección activa:", pausarDeteccion);
-      
-      if (currentModel) {
-        console.log("Propiedades del modelo:", Object.keys(currentModel));
-        console.log("Animaciones en currentModel:", currentModel.animations ? currentModel.animations.map(a => a.name) : 'ninguna');
-        console.log("Posición del modelo:", currentModel.position);
-        console.log("Escala del modelo:", currentModel.scale);
-      }
-      
-      if (mixer) {
-        console.log("Acciones del mixer:", mixer._actions.length);
-        console.log("Nombres de acciones:", mixer._actions.map(a => a._clip ? a._clip.name : 'sin nombre'));
-        console.log("Estados de acciones:", mixer._actions.map(a => ({
-          name: a._clip ? a._clip.name : 'sin nombre',
-          enabled: a.enabled,
-          paused: a.paused,
-          weight: a.weight
-        })));
-      }
-      
-      // Preguntar si quiere limpiar la escena
-      const respuesta = confirm('¿Quieres limpiar la escena completamente? Esto eliminará todos los modelos y animaciones acumulados.');
-      if (respuesta) {
-        limpiarEscena();
-        alert('Escena limpiada. Puedes volver a detectar banderas normalmente.');
-      } else {
-        alert('Revisa la consola para ver el diagnóstico completo del modelo y sus animaciones.');
-      }
+    UI.panelBody.innerHTML = html;
+  } catch (error) {
+    console.error('Error al cargar datos del país:', error);
+    if (UI.panelBody) {
+      UI.panelBody.innerHTML = '<p class="panel-empty">No se pudo cargar la información del país seleccionado.</p>';
     }
   }
 }
 
-// Asignar eventos a los botones de interacción
-window.addEventListener('DOMContentLoaded', function() {
-  const btnVideo = document.querySelector('#botones-interaccion #videomodal');
-  if (btnVideo) {
-    btnVideo.addEventListener('click', function() {
-      mostrarModalVideo();
-      document.getElementById('btn-modal-video').style.display = 'flex';
-    document.getElementById('video').style.display = 'none';
-    document.getElementById('canvas3d').style.display = 'none';
-    document.getElementById('frameCanvas').style.display = 'none';
-    document.getElementById('deteccion-info').style.display = 'none';
-    document.getElementById('btn-iniciar-modelo').style.display = 'none';
-    document.getElementById('btn-diagnostico').style.display = 'none';
-    document.getElementById('animacion-progreso').style.display = 'none';
-    pausarDeteccion = false; // Resetear pausa de detección
-    
-    // Limpiar escena 3D al salir del modo RA
-    try {
-      if (typeof currentModel !== 'undefined' && currentModel) {
-        scene.remove(currentModel);
-        currentModel = null;
-      }
-      if (typeof mixer !== 'undefined' && mixer) {
-        mixer.stopAllAction();
-        mixer.uncacheRoot(mixer.getRoot());
-        mixer = null;
-      }
-    } catch (e) {
-      console.log("Error al limpiar escena:", e);
+async function startRA() {
+  setStageMode('ra');
+  UI.startButton && (UI.startButton.style.display = 'flex');
+  UI.diagnosticButton && (UI.diagnosticButton.style.display = 'flex');
+
+  if (raSessionActive) {
+    renderRAInstructions();
+    return;
+  }
+
+  raSessionActive = true;
+  pausarDeteccion = false;
+  paisDetectadoActual = null;
+  contadorDeteccionSostenida = 0;
+
+  try {
+    if (!tfModel) {
+      setPanelLoading('animacion', 'Activando RA', 'Cargando modelo de visión por computadora...');
     }
+    await loadTensorModel();
+    initThreeScene();
+    await startCameraStream();
+    beginDetectionLoop();
+    renderRAInstructions();
+  } catch (error) {
+    console.error('Error al iniciar la experiencia RA:', error);
+    openPanel('animacion', 'Escaneo en tiempo real', '<p class="panel-empty">No se pudo activar la cámara. Verifica los permisos e inténtalo nuevamente.</p>');
+    UI.panel?.classList.add('ra-panel--overlay');
+    detenerRA();
+  }
+}
+
+async function loadTensorModel() {
+  if (tfModel) return;
+  tfModel = await tf.loadLayersModel('modeloIA/model.json');
+}
+
+function initThreeScene() {
+  if (raScene || !UI.canvas3d) return;
+
+  raScene = new THREE.Scene();
+  const { width, height } = getStageSize();
+  raCamera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+  raCamera.position.z = 5;
+
+  raRenderer = new THREE.WebGLRenderer({ canvas: UI.canvas3d, alpha: true, antialias: true });
+  raRenderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  raRenderer.setSize(width, height, false);
+
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+  raScene.add(ambientLight);
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 0.85);
+  directionalLight.position.set(1, 1, 1);
+  raScene.add(directionalLight);
+
+  clock = new THREE.Clock();
+  animateScene();
+}
+
+function animateScene() {
+  if (!raRenderer || !raScene || !raCamera) return;
+  animationFrameId = requestAnimationFrame(animateScene);
+  if (mixer && clock) {
+    const delta = clock.getDelta();
+    mixer.update(delta);
+  }
+  raRenderer.render(raScene, raCamera);
+}
+
+function getStageSize() {
+  if (!UI.stage) {
+    return { width: 640, height: 960 };
+  }
+  const rect = UI.stage.getBoundingClientRect();
+  let { width, height } = rect;
+  if (!height) {
+    height = width * (16 / 9);
+  }
+  return { width, height };
+}
+
+async function startCameraStream() {
+  if (!UI.video) return;
+
+  // Try to get the environment camera, fallback to any camera if not available
+  let constraints = { video: { facingMode: { ideal: 'environment' } } };
+  try {
+    videoStream = await navigator.mediaDevices.getUserMedia(constraints);
+  } catch (error) {
+    // Fallback: try without facingMode
+    try {
+      constraints = { video: true };
+      videoStream = await navigator.mediaDevices.getUserMedia(constraints);
+    } catch (err) {
+      alert('No se pudo acceder a la cámara. Por favor, revisa los permisos del navegador.');
+      throw err;
+    }
+  }
+
+  UI.video.srcObject = videoStream;
+  await UI.video.play().catch(() => {});
+
+  if (!ctx && UI.frameCanvas) {
+    ctx = UI.frameCanvas.getContext('2d');
+  }
+}
+
+function beginDetectionLoop() {
+  if (!UI.frameCanvas) return;
+  UI.frameCanvas.width = 400;
+  UI.frameCanvas.height = 200;
+
+  if (raPredictionInterval) {
+    clearInterval(raPredictionInterval);
+  }
+
+  setTimeout(() => {
+    if (!raSessionActive) return;
+    raPredictionInterval = setInterval(predecir, 500);
+  }, 1500);
+}
+
+async function predecir() {
+  if (!tfModel || !ctx || !UI.video || pausarDeteccion) return;
+  if (!UI.video.videoWidth || !UI.video.videoHeight) return;
+
+  ctx.drawImage(UI.video, 0, 0, UI.frameCanvas.width, UI.frameCanvas.height);
+  const tensor = tf.browser
+    .fromPixels(UI.frameCanvas)
+    .resizeNearestNeighbor([224, 224])
+    .toFloat()
+    .div(255)
+    .expandDims();
+
+  const pred = await tfModel.predict(tensor).data();
+  tensor.dispose();
+
+  const maxProb = Math.max(...pred);
+  const banderaDetectada = pred.indexOf(maxProb);
+  const confianza = (maxProb * 100).toFixed(1);
+  const umbralConfianza = 0.7;
+
+  if (maxProb > umbralConfianza && banderasConfig[banderaDetectada] && banderasConfig[banderaDetectada].nombre !== "NO") {
+    const config = banderasConfig[banderaDetectada];
     
-    detenerCamara();
-    });
+    // Solo actualizar si es una bandera diferente a la actual
+    if (paisDetectadoActual !== config.nombre) {
+      contadorDeteccionSostenida++;
+      
+      // Requerir detecciones consecutivas para evitar falsos positivos
+      if (contadorDeteccionSostenida >= DETECCIONES_REQUERIDAS) {
+        paisDetectadoActual = config.nombre;
+        contadorDeteccionSostenida = 0;
+        
+        if (UI.detectionCard) {
+          UI.detectionCard.style.display = 'grid';
+        }
+        if (UI.nombreBandera) {
+          UI.nombreBandera.textContent = config.nombre;
+        }
+        if (UI.valorConfianza) {
+          UI.valorConfianza.textContent = `${confianza}%`;
+        }
+        
+        // Solo cargar modelo si tiene textura
+        if (config.textura) {
+          await cargarModelo3D(config.textura);
+        }
+      }
+    } else {
+      // Reiniciar contador si es la misma bandera
+      contadorDeteccionSostenida = 0;
+      // Actualizar solo la confianza si es la misma bandera
+      if (UI.valorConfianza) {
+        UI.valorConfianza.textContent = `${confianza}%`;
+      }
+    }
+  } else if (paisDetectadoActual !== null) {
+    // Solo limpiar si había algo detectado anteriormente
+    contadorDeteccionSostenida = 0;
+    paisDetectadoActual = null;
+    hideDetectionCards();
+    clearModel();
   }
-  const btnDatos = document.querySelector('#botones-interaccion #datos');
-  if (btnDatos) {
-    btnDatos.addEventListener('click', function() {
-      mostrarModalDatos();
-       document.getElementById('btn-modal-video').style.display = 'none';
-    document.getElementById('video').style.display = 'none';
-    document.getElementById('canvas3d').style.display = 'none';
-    document.getElementById('frameCanvas').style.display = 'none';
-    document.getElementById('deteccion-info').style.display = 'none';
-    document.getElementById('btn-iniciar-modelo').style.display = 'none';
-    document.getElementById('btn-diagnostico').style.display = 'none';
-    document.getElementById('animacion-progreso').style.display = 'none';
-    pausarDeteccion = false; // Resetear pausa de detección
-    detenerCamara();
+}
+
+async function cargarModelo3D(textura) {
+  if (!raScene) return;
+  
+  // Limpiar modelo anterior
+  clearModel();
+  
+  const loader = new THREE.GLTFLoader();
+
+  try {
+    // Cargar el modelo 3D
+    const gltf = await new Promise((resolve, reject) => {
+      loader.load('3D_model/F2.glb', resolve, undefined, reject);
     });
+
+    currentModel = gltf.scene;
+    
+    // Si hay textura, aplicarla al modelo
+    if (textura) {
+      const textureLoader = new THREE.TextureLoader();
+      const texture = await new Promise((resolve, reject) => {
+        textureLoader.load(textura, resolve, undefined, reject);
+      });
+      
+      currentModel.traverse((child) => {
+        if (child.isMesh && child.material) {
+          if (Array.isArray(child.material)) {
+            child.material.forEach(mat => {
+              if (mat.map) mat.map = texture;
+            });
+          } else {
+            if (child.material.map) child.material.map = texture;
+          }
+        }
+      });
+    }
+
+    // Configurar animaciones si existen
+    if (gltf.animations && gltf.animations.length > 0) {
+      mixer = new THREE.AnimationMixer(currentModel);
+    }
+
+    // Posicionar y escalar el modelo
+    currentModel.position.set(0, 0, 0);
+    currentModel.scale.setScalar(1);
+    
+    raScene.add(currentModel);
+  } catch (error) {
+    console.error('Error al cargar el modelo 3D:', error);
   }
-  const btnTrivia = document.querySelector('#botones-interaccion #trivia');
-  if (btnTrivia) {
-    btnTrivia.addEventListener('click', function() {
-      mostrarModalTrivia();
-      document.getElementById('btn-modal-video').style.display = 'none';
-  document.getElementById('video').style.display = 'none';
-  document.getElementById('canvas3d').style.display = 'none';
-  document.getElementById('frameCanvas').style.display = 'none';
-  document.getElementById('deteccion-info').style.display = 'none';
-  document.getElementById('btn-iniciar-modelo').style.display = 'none';
-  document.getElementById('btn-diagnostico').style.display = 'none';
-  document.getElementById('animacion-progreso').style.display = 'none';
-  pausarDeteccion = false; // Resetear pausa de detección
+}
+
+function clearModel() {
+  if (currentModel && raScene) {
+    raScene.remove(currentModel);
+  }
+  currentModel = null;
+  if (mixer) {
+    mixer.stopAllAction();
+    mixer = null;
+  }
+}
+
+function hideDetectionCards() {
+  if (UI.detectionCard) {
+    UI.detectionCard.style.display = 'none';
+  }
+  if (UI.animacionCard) {
+    UI.animacionCard.style.display = 'none';
+  }
+}
+
+function triggerModelAnimation() {
+  if (!raSessionActive || !mixer || !currentModel) {
+    window.alert('Escanea una bandera para cargar un modelo 3D antes de animarlo.');
+    return;
+  }
+
+  const actions = mixer._actions || [];
+  const posiblesNombres = ['Wave', 'wave', 'Waving', 'waving', 'Animation', 'animation', 'Action', 'action'];
+  let animationAction = null;
+
+  for (const nombre of posiblesNombres) {
+    animationAction = actions.find((action) => action._clip && action._clip.name === nombre);
+    if (animationAction) break;
+  }
+
+  if (!animationAction && currentModel.animations && currentModel.animations.length > 0) {
+    animationAction = mixer.clipAction(currentModel.animations[0]);
+  }
+
+  if (!animationAction) {
+    window.alert('Este modelo no cuenta con animaciones configuradas.');
+    return;
+  }
+
+  mixer.stopAllAction();
+  animationAction.reset();
+  animationAction.setLoop(THREE.LoopOnce);
+  animationAction.clampWhenFinished = true;
+  animationAction.enabled = true;
+  animationAction.play();
+
+  pausarDeteccion = true;
+  if (UI.animacionCard) {
+    UI.animacionCard.style.display = 'grid';
+  }
+
+  const onFinished = () => {
+    pausarDeteccion = false;
+    if (UI.animacionCard) {
+      UI.animacionCard.style.display = 'none';
+    }
+    mixer.removeEventListener('finished', onFinished);
+  };
+
+  mixer.addEventListener('finished', onFinished);
+
+  setTimeout(() => {
+    if (pausarDeteccion) {
+      pausarDeteccion = false;
+      if (UI.animacionCard) {
+        UI.animacionCard.style.display = 'none';
+      }
+    }
+  }, 4000);
+}
+
+function triggerDiagnostic() {
+  if (!raSessionActive) {
+    window.alert('Activa la experiencia RA para ejecutar el diagnóstico.');
+    return;
+  }
+
+  console.group('Diagnóstico RA');
+  console.log('Modelo de IA cargado:', !!tfModel);
+  console.log('Mixer activo:', !!mixer);
+  console.log('Modelo 3D presente:', !!currentModel);
+  console.log('Pausa de detección:', pausarDeteccion);
+  console.log('País detectado actual:', paisDetectadoActual);
+  if (mixer) {
+    console.log('Animaciones disponibles:', mixer._actions.map((action) => (action._clip ? action._clip.name : 'sin nombre')));
+  }
+  console.groupEnd();
+
+  const limpiar = window.confirm('¿Quieres limpiar la escena actual? Esto eliminará el modelo y reanudará la detección.');
+  if (limpiar) {
+    clearModel();
+    pausarDeteccion = false;
+    if (UI.animacionCard) {
+      UI.animacionCard.style.display = 'none';
+    }
+  }
+}
+
+function detenerRA() {
+  if (!raSessionActive) return;
+
+  if (raPredictionInterval) {
+    clearInterval(raPredictionInterval);
+    raPredictionInterval = null;
+  }
+
   detenerCamara();
-    });
+  clearModel();
+
+  if (raScene) {
+    raScene = null;
   }
-  const btnAnimacion = document.querySelector('#botones-interaccion #animacion');
-  if (btnAnimacion) {
-    btnAnimacion.addEventListener('click', function() {
-      // Mostrar cámara y canvas 3D, ocultar otros elementos
-      document.getElementById('video').style.display = '';
-      document.getElementById('canvas3d').style.display = '';
-      document.getElementById('frameCanvas').style.display = 'none';
-      document.getElementById('deteccion-info').style.display = 'none';
-      document.getElementById('btn-modal-video').style.display = 'none';
-      // Ocultar modales si están abiertos
-      document.getElementById('modal-video').style.display = 'none';
-      document.getElementById('modal-datos').style.display = 'none';
-      document.getElementById('modal-trivia').style.display = 'none';
-      // Iniciar RA
-      RAbegin();
-    });
+  raCamera = null;
+
+  if (raRenderer) {
+    raRenderer.dispose();
+    raRenderer = null;
   }
-});
+
+  clock = null;
+  pausarDeteccion = false;
+  paisDetectadoActual = null;
+  contadorDeteccionSostenida = 0;
+  hideDetectionCards();
+
+  if (animationFrameId) {
+    cancelAnimationFrame(animationFrameId);
+    animationFrameId = null;
+  }
+
+  UI.startButton && (UI.startButton.style.display = 'none');
+  UI.diagnosticButton && (UI.diagnosticButton.style.display = 'none');
+
+  raSessionActive = false;
+
+  setStageMode('idle');
+}
+
+function detenerCamara() {
+  if (videoStream) {
+    videoStream.getTracks().forEach((track) => track.stop());
+    videoStream = null;
+  }
+
+  if (UI.video && UI.video.srcObject) {
+    UI.video.srcObject.getTracks().forEach((track) => track.stop());
+    UI.video.srcObject = null;
+  }
+}
+
+function updateRendererSize() {
+  if (!raRenderer || !raCamera || !UI.stage) return;
+  const { width, height } = getStageSize();
+  if (!width || !height) return;
+  raCamera.aspect = width / height;
+  raCamera.updateProjectionMatrix();
+  raRenderer.setSize(width, height, false);
+}
+
+window.addEventListener('resize', updateRendererSize);
+window.addEventListener('beforeunload', detenerRA);
+
+window.mostrarDatosPais = mostrarDatosPais;
