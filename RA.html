@@ -25,6 +25,11 @@
         <video id="video" autoplay playsinline muted></video>
         <canvas id="canvas3d" aria-hidden="true"></canvas>
         <canvas id="frameCanvas" width="400" height="200" aria-hidden="true"></canvas>
+        <div class="ra-scanner" aria-hidden="true">
+          <div class="ra-scanner__frame"></div>
+          <div class="ra-scanner__beam"></div>
+          <div class="ra-scanner__focus"></div>
+        </div>
         <div class="ra-viewer__cards">
           <div id="deteccion-info" class="status-card" style="display:none;">
             <p class="status-card__label">Bandera detectada</p>
@@ -105,7 +110,6 @@
 
   <!-- Controles específicos para RA -->
   <div id="ra-controls" class="ra-controls" style="display:none;">
-    <div class="ra-scanner"></div>
     <div class="ra-controls__buttons">
       <button class="ra-control-btn" type="button" id="btn-iniciar-modelo" data-action="animar">
         <i class="fa-solid fa-play"></i>

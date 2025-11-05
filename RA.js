@@ -108,6 +108,17 @@ let currentPanelAction = null;
 
 document.addEventListener('DOMContentLoaded', init);
 
+function setRAControlsVisible(shouldShow) {
+  if (!UI.raControls) return;
+  UI.raControls.style.display = shouldShow ? 'block' : 'none';
+  if (UI.startButton) {
+    UI.startButton.style.display = shouldShow ? 'inline-flex' : 'none';
+  }
+  if (UI.diagnosticButton) {
+    UI.diagnosticButton.style.display = shouldShow ? 'inline-flex' : 'none';
+  }
+}
+
 function init() {
   UI.viewer = document.querySelector('.ra-viewer');
   UI.stage = document.querySelector('.ra-viewer__stage');
@@ -277,8 +288,8 @@ function setStageMode(mode) {
     UI.stagePlaceholder.hidden = mode !== 'idle';
   }
 
-  if (UI.raControls) {
-    UI.raControls.style.display = mode === 'ra' ? 'block' : 'none';
+  if (mode !== 'ra') {
+    setRAControlsVisible(false);
   }
 
   if (mode === 'panel') {
@@ -302,6 +313,7 @@ function setStageMode(mode) {
   if (!isRA) {
     if (UI.startButton) UI.startButton.style.display = 'none';
     if (UI.diagnosticButton) UI.diagnosticButton.style.display = 'none';
+    setRAControlsVisible(false);
     hideDetectionCards();
   }
 }
@@ -800,9 +812,7 @@ async function mostrarDatosPais() {
 
 async function startRA() {
   setStageMode('ra');
-  if (UI.raControls) {
-    UI.raControls.style.display = 'block';
-  }
+  setRAControlsVisible(false);
 
   if (raSessionActive) {
     renderRAInstructions();
@@ -962,6 +972,7 @@ async function predecir() {
         if (UI.valorConfianza) {
           UI.valorConfianza.textContent = `${confianza}%`;
         }
+        setRAControlsVisible(true);
         
         // Solo cargar modelo si tiene textura
         if (config.textura) {
@@ -986,6 +997,7 @@ async function predecir() {
       if (UI.valorConfianza) {
         UI.valorConfianza.textContent = `${confianza}%`;
       }
+      setRAControlsVisible(true);
       
       // Activar modal automático si la confianza es mayor al 90%
       if (maxProb > 0.9 && !modalTimeout && paisDetectadoActual !== lastHighConfidenceDetection) {
@@ -1009,6 +1021,7 @@ async function predecir() {
       modalTimeout = null;
     }
     hideDetectionCards();
+    setRAControlsVisible(false);
     clearModel();
   }
 }
@@ -1199,9 +1212,7 @@ function detenerRA() {
     animationFrameId = null;
   }
 
-  if (UI.raControls) {
-    UI.raControls.style.display = 'none';
-  }
+  setRAControlsVisible(false);
 
   // Limpiar timeout del modal automático
   if (modalTimeout) {
