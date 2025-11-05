@@ -65,6 +65,7 @@ let raCamera = null;
 let raRenderer = null;
 let currentModel = null;
 let mixer = null;
+let currentAnimations = [];
 let clock = null;
 let pausarDeteccion = false;
 let videoStream = null;
@@ -972,11 +973,13 @@ async function predecir() {
         if (UI.valorConfianza) {
           UI.valorConfianza.textContent = `${confianza}%`;
         }
-        setRAControlsVisible(true);
         
         // Solo cargar modelo si tiene textura
         if (config.textura) {
           await cargarModelo3D(config.textura);
+          setRAControlsVisible(Boolean(currentModel));
+        } else {
+          setRAControlsVisible(false);
         }
         
         // Activar modal automático si la confianza es mayor al 90%
@@ -997,7 +1000,7 @@ async function predecir() {
       if (UI.valorConfianza) {
         UI.valorConfianza.textContent = `${confianza}%`;
       }
-      setRAControlsVisible(true);
+      setRAControlsVisible(Boolean(currentModel));
       
       // Activar modal automático si la confianza es mayor al 90%
       if (maxProb > 0.9 && !modalTimeout && paisDetectadoActual !== lastHighConfidenceDetection) {
@@ -1063,8 +1066,14 @@ async function cargarModelo3D(textura) {
     }
 
     // Configurar animaciones si existen
-    if (gltf.animations && gltf.animations.length > 0) {
+    currentAnimations = Array.isArray(gltf.animations) ? gltf.animations : [];
+    if (currentAnimations.length > 0) {
       mixer = new THREE.AnimationMixer(currentModel);
+      currentAnimations.forEach((clip) => {
+        mixer.clipAction(clip);
+      });
+    } else {
+      mixer = null;
     }
 
     // Posicionar y escalar el modelo
@@ -1082,6 +1091,7 @@ function clearModel() {
     raScene.remove(currentModel);
   }
   currentModel = null;
+  currentAnimations = [];
   if (mixer) {
     mixer.stopAllAction();
     mixer = null;
@@ -1098,24 +1108,34 @@ function hideDetectionCards() {
 }
 
 function triggerModelAnimation() {
-  if (!raSessionActive || !mixer || !currentModel) {
+  if (!raSessionActive || !currentModel) {
     window.alert('Escanea una bandera para cargar un modelo 3D antes de animarlo.');
     return;
   }
 
-  const actions = mixer._actions || [];
+  if (!currentAnimations.length) {
+    window.alert('Este modelo no cuenta con animaciones configuradas.');
+    return;
+  }
+
+  if (!mixer) {
+    mixer = new THREE.AnimationMixer(currentModel);
+    currentAnimations.forEach((clip) => mixer.clipAction(clip));
+  }
+
   const posiblesNombres = ['Wave', 'wave', 'Waving', 'waving', 'Animation', 'animation', 'Action', 'action'];
-  let animationAction = null;
+  let clipSeleccionado = null;
 
   for (const nombre of posiblesNombres) {
-    animationAction = actions.find((action) => action._clip && action._clip.name === nombre);
-    if (animationAction) break;
+    clipSeleccionado = currentAnimations.find((clip) => clip.name === nombre);
+    if (clipSeleccionado) break;
   }
 
-  if (!animationAction && currentModel.animations && currentModel.animations.length > 0) {
-    animationAction = mixer.clipAction(currentModel.animations[0]);
+  if (!clipSeleccionado) {
+    clipSeleccionado = currentAnimations[0];
   }
 
+  const animationAction = mixer.clipAction(clipSeleccionado);
   if (!animationAction) {
     window.alert('Este modelo no cuenta con animaciones configuradas.');
     return;
@@ -1165,9 +1185,8 @@ function triggerDiagnostic() {
   console.log('Modelo 3D presente:', !!currentModel);
   console.log('Pausa de detección:', pausarDeteccion);
   console.log('País detectado actual:', paisDetectadoActual);
-  if (mixer) {
-    console.log('Animaciones disponibles:', mixer._actions.map((action) => (action._clip ? action._clip.name : 'sin nombre')));
-  }
+  const animacionesDisponibles = currentAnimations.map((clip) => clip.name || 'sin nombre');
+  console.log('Animaciones disponibles:', animacionesDisponibles.length ? animacionesDisponibles : 'sin animaciones');
   console.groupEnd();
 
   const limpiar = window.confirm('¿Quieres limpiar la escena actual? Esto eliminará el modelo y reanudará la detección.');
