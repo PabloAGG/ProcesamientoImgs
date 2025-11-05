@@ -277,6 +277,10 @@ function setStageMode(mode) {
     UI.stagePlaceholder.hidden = mode !== 'idle';
   }
 
+  if (UI.raControls) {
+    UI.raControls.style.display = mode === 'ra' ? 'block' : 'none';
+  }
+
   if (mode === 'panel') {
     if (UI.video) UI.video.style.display = 'none';
     if (UI.canvas3d) UI.canvas3d.style.display = 'none';
@@ -589,25 +593,56 @@ function renderTriviaQuestion() {
       <div class="trivia-options">
         ${pregunta.opciones.map((opcion, idx) => `<button type="button" data-answer="${idx}">${opcion}</button>`).join('')}
       </div>
+      <p class="trivia-feedback" aria-live="polite"></p>
     </section>`;
 
   openPanel('trivia', 'Trivia Mundialista', html);
 
   UI.panelBody?.querySelectorAll('.trivia-options button').forEach((btn) => {
-    btn.addEventListener('click', () => handleTriviaAnswer(Number(btn.dataset.answer)));
+    btn.addEventListener('click', () => handleTriviaAnswer(Number(btn.dataset.answer), btn));
   });
 }
 
-function handleTriviaAnswer(indiceOpcion) {
+function handleTriviaAnswer(indiceOpcion, botonSeleccionado) {
   const pregunta = preguntasTrivia[indiceTrivia];
   if (!pregunta) return;
 
-  if (indiceOpcion === pregunta.respuesta) {
-    aciertosTrivia++;
+  const opcionesContainer = UI.panelBody?.querySelector('.trivia-options');
+  if (!opcionesContainer || opcionesContainer.dataset.locked === 'true') {
+    return;
   }
 
-  indiceTrivia++;
-  renderTriviaQuestion();
+  opcionesContainer.dataset.locked = 'true';
+  const botones = Array.from(opcionesContainer.querySelectorAll('button'));
+  botones.forEach((btn) => {
+    btn.disabled = true;
+  });
+
+  const respuestaCorrecta = pregunta.respuesta;
+  const textoCorrecto = pregunta.opciones[respuestaCorrecta];
+  const feedback = UI.panelBody?.querySelector('.trivia-feedback');
+
+  if (Number.isInteger(respuestaCorrecta) && botones[respuestaCorrecta]) {
+    botones[respuestaCorrecta].classList.add('is-correct');
+  }
+
+  if (indiceOpcion === respuestaCorrecta) {
+    aciertosTrivia++;
+    botonSeleccionado?.classList.add('is-correct');
+    if (feedback) {
+      feedback.textContent = '¡Correcto!';
+    }
+  } else {
+    botonSeleccionado?.classList.add('is-incorrect');
+    if (feedback) {
+      feedback.textContent = `Incorrecto. La respuesta correcta era: ${textoCorrecto}.`;
+    }
+  }
+
+  setTimeout(() => {
+    indiceTrivia++;
+    renderTriviaQuestion();
+  }, 1600);
 }
 
 function renderTriviaSummary() {
