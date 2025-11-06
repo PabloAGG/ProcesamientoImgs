@@ -120,16 +120,16 @@ function setAnimationButtonState(state) {
   const label = UI.startButton.querySelector('span');
 
   if (icon) {
-    icon.classList.remove('fa-play', 'fa-pause');
+    icon.classList.remove('fa-play', 'fa-pause', 'fa-stop');
   }
 
   switch (state) {
     case 'pause':
       if (icon) {
-        icon.classList.add('fa-pause');
+        icon.classList.add('fa-stop');
       }
       if (label) {
-        label.textContent = 'Pausar';
+        label.textContent = 'Detener';
       }
       break;
     case 'resume':
@@ -1166,7 +1166,7 @@ async function cargarModelo3D(textura) {
     }
 
     // Posicionar y escalar el modelo
-    currentModel.position.set(0, 0, 0);
+    currentModel.position.set(0, -5, 0);
     currentModel.scale.setScalar(1);
     
     raScene.add(currentModel);
@@ -1208,25 +1208,8 @@ function triggerModelAnimation() {
   }
 
   if (isAnimationPlaying && activeAnimationAction) {
-    if (!animationIsPaused) {
-      activeAnimationAction.paused = true;
-      animationIsPaused = true;
-      pausarDeteccion = false;
-      if (UI.animacionCard) {
-        UI.animacionCard.style.display = 'none';
-      }
-      setAnimationButtonState('resume');
-      clearAnimationSafetyTimer();
-    } else {
-      activeAnimationAction.paused = false;
-      animationIsPaused = false;
-      pausarDeteccion = true;
-      if (UI.animacionCard) {
-        UI.animacionCard.style.display = 'grid';
-      }
-      setAnimationButtonState('pause');
-      startAnimationSafetyTimer();
-    }
+    // Detener completamente la animación
+    teardownAnimationTracking();
     return;
   }
 
@@ -1266,9 +1249,7 @@ function triggerModelAnimation() {
   animationIsPaused = false;
 
   pausarDeteccion = true;
-  if (UI.animacionCard) {
-    UI.animacionCard.style.display = 'grid';
-  }
+  // No mostrar el modal de animación
   setAnimationButtonState('pause');
   startAnimationSafetyTimer();
 
