@@ -66,6 +66,11 @@ let raRenderer = null;
 let currentModel = null;
 let mixer = null;
 let currentAnimations = [];
+let activeAnimationAction = null;
+let isAnimationPlaying = false;
+let animationIsPaused = false;
+let animationFinishHandler = null;
+let animationSafetyTimeout = null;
 let clock = null;
 let pausarDeteccion = false;
 let videoStream = null;
@@ -109,14 +114,98 @@ let currentPanelAction = null;
 
 document.addEventListener('DOMContentLoaded', init);
 
+function setAnimationButtonState(state) {
+  if (!UI.startButton) return;
+  const icon = UI.startButton.querySelector('i');
+  const label = UI.startButton.querySelector('span');
+
+  if (icon) {
+    icon.classList.remove('fa-play', 'fa-pause');
+  }
+
+  switch (state) {
+    case 'pause':
+      if (icon) {
+        icon.classList.add('fa-pause');
+      }
+      if (label) {
+        label.textContent = 'Pausar';
+      }
+      break;
+    case 'resume':
+      if (icon) {
+        icon.classList.add('fa-play');
+      }
+      if (label) {
+        label.textContent = 'Reanudar';
+      }
+      break;
+    default:
+      if (icon) {
+        icon.classList.add('fa-play');
+      }
+      if (label) {
+        label.textContent = 'Animar';
+      }
+      break;
+  }
+}
+
+function clearAnimationSafetyTimer() {
+  if (animationSafetyTimeout) {
+    clearTimeout(animationSafetyTimeout);
+    animationSafetyTimeout = null;
+  }
+}
+
+function startAnimationSafetyTimer() {
+  clearAnimationSafetyTimer();
+  animationSafetyTimeout = setTimeout(() => {
+    animationSafetyTimeout = null;
+    if (isAnimationPlaying && !animationIsPaused) {
+      teardownAnimationTracking();
+    }
+  }, 4000);
+}
+
+function teardownAnimationTracking(resetButton = true) {
+  clearAnimationSafetyTimer();
+  if (animationFinishHandler && mixer) {
+    mixer.removeEventListener('finished', animationFinishHandler);
+  }
+  animationFinishHandler = null;
+  if (activeAnimationAction) {
+    activeAnimationAction.stop();
+  }
+  activeAnimationAction = null;
+  isAnimationPlaying = false;
+  animationIsPaused = false;
+  pausarDeteccion = false;
+  if (UI.animacionCard) {
+    UI.animacionCard.style.display = 'none';
+  }
+  if (resetButton) {
+    setAnimationButtonState('idle');
+  }
+  if (mixer) {
+    mixer.stopAllAction();
+  }
+}
+
 function setRAControlsVisible(shouldShow) {
   if (!UI.raControls) return;
   UI.raControls.style.display = shouldShow ? 'block' : 'none';
   if (UI.startButton) {
     UI.startButton.style.display = shouldShow ? 'inline-flex' : 'none';
+    if (shouldShow && !isAnimationPlaying && !animationIsPaused) {
+      setAnimationButtonState('idle');
+    }
   }
   if (UI.diagnosticButton) {
     UI.diagnosticButton.style.display = shouldShow ? 'inline-flex' : 'none';
+  }
+  if (!shouldShow) {
+    teardownAnimationTracking();
   }
 }
 
@@ -1092,8 +1181,8 @@ function clearModel() {
   }
   currentModel = null;
   currentAnimations = [];
+  teardownAnimationTracking();
   if (mixer) {
-    mixer.stopAllAction();
     mixer = null;
   }
 }
@@ -1115,6 +1204,29 @@ function triggerModelAnimation() {
 
   if (!currentAnimations.length) {
     window.alert('Este modelo no cuenta con animaciones configuradas.');
+    return;
+  }
+
+  if (isAnimationPlaying && activeAnimationAction) {
+    if (!animationIsPaused) {
+      activeAnimationAction.paused = true;
+      animationIsPaused = true;
+      pausarDeteccion = false;
+      if (UI.animacionCard) {
+        UI.animacionCard.style.display = 'none';
+      }
+      setAnimationButtonState('resume');
+      clearAnimationSafetyTimer();
+    } else {
+      activeAnimationAction.paused = false;
+      animationIsPaused = false;
+      pausarDeteccion = true;
+      if (UI.animacionCard) {
+        UI.animacionCard.style.display = 'grid';
+      }
+      setAnimationButtonState('pause');
+      startAnimationSafetyTimer();
+    }
     return;
   }
 
@@ -1146,31 +1258,27 @@ function triggerModelAnimation() {
   animationAction.setLoop(THREE.LoopOnce);
   animationAction.clampWhenFinished = true;
   animationAction.enabled = true;
+  animationAction.paused = false;
   animationAction.play();
+
+  activeAnimationAction = animationAction;
+  isAnimationPlaying = true;
+  animationIsPaused = false;
 
   pausarDeteccion = true;
   if (UI.animacionCard) {
     UI.animacionCard.style.display = 'grid';
   }
+  setAnimationButtonState('pause');
+  startAnimationSafetyTimer();
 
-  const onFinished = () => {
-    pausarDeteccion = false;
-    if (UI.animacionCard) {
-      UI.animacionCard.style.display = 'none';
-    }
-    mixer.removeEventListener('finished', onFinished);
+  if (animationFinishHandler && mixer) {
+    mixer.removeEventListener('finished', animationFinishHandler);
+  }
+  animationFinishHandler = () => {
+    teardownAnimationTracking();
   };
-
-  mixer.addEventListener('finished', onFinished);
-
-  setTimeout(() => {
-    if (pausarDeteccion) {
-      pausarDeteccion = false;
-      if (UI.animacionCard) {
-        UI.animacionCard.style.display = 'none';
-      }
-    }
-  }, 4000);
+  mixer.addEventListener('finished', animationFinishHandler);
 }
 
 function triggerDiagnostic() {
