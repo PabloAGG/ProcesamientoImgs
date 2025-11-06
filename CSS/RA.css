@@ -668,9 +668,9 @@ header button:hover {
 /* Controles específicos de RA */
 .ra-controls {
     position: fixed;
-    bottom: 32px;
-    right: 32px;
-    z-index: 14;
+    bottom: 80px;
+    right: 50px;
+    z-index: 100;
 }
 
 .ra-controls__buttons {
