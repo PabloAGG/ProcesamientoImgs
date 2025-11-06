@@ -1166,7 +1166,7 @@ async function cargarModelo3D(textura) {
     }
 
     // Posicionar y escalar el modelo
-    currentModel.position.set(-1, -2, 0);
+    currentModel.position.set(-0.5, -2, 0);
     currentModel.scale.setScalar(1);
     
     raScene.add(currentModel);
